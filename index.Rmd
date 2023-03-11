@@ -1,0 +1,31 @@
+--- 
+title: "Rでやるランダムフォレスト"
+author: "Akiru Kato"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [references.bib, packages.bib]
+url: "https://paithiov909.github.io/amazon-reviews/"
+# cover-image: path to the social sharing image like images/cover.jpg
+description: |
+  R（tidymodels）でrangerのランダムフォレストを使ってみます
+link-citations: yes
+github-repo: paithiov909/amazon-reviews
+---
+
+# はじめに {-#preface}
+
+> R（tidymodels）でrangerのランダムフォレストを使ってみます
+
+```{r}
+require(tidymodels)
+require(textrecipes)
+tidymodels::tidymodels_prefer()
+```
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```

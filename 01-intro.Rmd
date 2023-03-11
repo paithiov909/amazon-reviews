@@ -1,0 +1,84 @@
+# Introduction {#intro}
+
+ランダムフォレストは @Breiman2001 で提案された教師あり学習の手法です。
+
+集団学習（ensemble learning, アンサンブル学習）のなかでもバギングと呼ばれるやつで、複数の弱学習器（決定木）を組み合わせています。
+
+ランダムフォレストは次のような特徴があるとされていて、とくに2010年代前半ごろまでよく使われていました。
+
+- 過学習が起こりにくいとされ、扱いやすい
+- 高次元だったり、相関があったりするデータでもわりと大丈夫
+- 欠損値がある・不均衡なデータでもわりと大丈夫
+- 木をつくるのは並列実行できるので、速い
+- 変数重要度を確認できる
+
+現在では勾配ブースティング系のアルゴリズムのほうが強力なので、以前のようには使われませんが、高次元のデータでも使えてそれなりに速く、変数重要度を確認できるため、とりあえずランダムフォレストに突っ込んで特徴量選択するみたいな使い方ができるようです。
+
+
+## rangerのランダムフォレストについて
+
+この資料では、tidymodelsから[ranger](https://cran.r-project.org/package=ranger)のランダムフォレストを使います。
+
+`parsnip::rand_forest`では、以下のエンジンを使用することができます。デフォルトでは、rangerのランダムフォレストが使用されます。
+
+- ranger
+- aorsf
+- h2o
+- randomForest
+- spark
+
+@JSSv077i01 は、randomForestよりも後発の実装です。
+
+
+## ハイパーパラメータ
+
+`parsnip::rand_forest`の各エンジンに共通するハイパーパラメータは次の３つです。
+
+1. mtry（木を作成するときに使う特徴量の数）
+2. trees（作成する木の数）
+3. min_n（ノードサイズの下限値）
+
+tidymodelsの枠組みのなかでは、`mtry`と`trees`を調整します。
+
+
+### mtry（木を作成するときに使う特徴量の数）
+
+`mtry`です。scikit-learnにおける`max_features`のようなものですが、`max_features`とは異なり、それぞれの木をつくるときに使用する特徴量の数をintegerで直接指定します。
+
+mtryのデフォルト値は`floor(sqrt(ncol(x)))`となっています。`ranger::ranger`では引数を受け取ってinteger scalarを返す関数を指定してもよいことになっていますが、tidymodelsのなかではintegerしか指定できません。
+
+
+### trees（作成する木の数）
+
+`num.trees`です。scikit-learnにおける`n_estimators`にあたります。
+
+デフォルト値は`500L`になっています。
+
+`trees`は大きいほうが精度が上がりますが、そのぶん学習にかかる時間も増えます。また、十分に大きくすると、それ以上大きくしてもあまり性能が改善しなくなるため、ふつうは適度な大きさで決め打ちします。
+
+
+### min_n（ノードサイズの下限値）
+
+`min.node.size`です。scikit-learnにおける`min_samples_split`のようなものです。
+
+デフォルト値は分類の場合は`1L`、回帰の場合は`5L`です。
+
+`min_n`については、`max.depth=NULL`の場合、最小ノードサイズを1にしたときによい結果が得られやすいとされています（[1.11. Ensemble methods — scikit-learn 1.2.2 documentation](https://scikit-learn.org/stable/modules/ensemble.html#parameters)）。ただし、そのぶん過学習は起こりやすくなります。また、一つ一つの木が深くなると学習に時間がかかるようになるため、速く学習を終わらせたいときには、この値を大きくして調整します。
+
+
+## その他の引数
+
+`ranger::ranger`の引数はたくさんありますが、ハイパーパラメータは上の3つなので、他の引数についてはあまり触る機会はないです。
+
+
+### imporatnce
+
+変数重要度を出したい場合、分類では`impurity`、回帰では`permutation`を指定します。
+
+なお、impurityベースの変数重要度については注意して使いましょうという[議論](https://scikit-learn.org/stable/modules/ensemble.html#feature-importance-evaluation)もあります。
+
+
+### num.threads
+
+`ranger::ranger`はデフォルトでは利用可能なCPUコア数と同じ数のスレッドを使用しますが、parsnipのヘルプによると、`parsnip::rand_forest`ではマルチスレッドでの実行は無効になっています。このため、マルチスレッドでの学習を有効にしたい場合は、`parsnip::set_engine`に`ranger::ranger`に渡される`num.threads`引数を明示的に指定します。
+

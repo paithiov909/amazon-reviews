@@ -1,0 +1,118 @@
+# Summary {#summary}
+
+## データセット
+
+ここではAmazonの商品レビューのデータセットを使用し、レビューの内容などをもとに、商品カテゴリを目的変数として分類することを試みます。
+
+```{r}
+dt <- data.table::fread("https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_multilingual_JP_v1_00.tsv.gz", quote = "")
+```
+
+このデータは、[Amazon Customer Reviews Dataset](https://s3.amazonaws.com/amazon-reviews-pds/readme.html)のうち、日本語のレビューだけを抽出したものです。次の15列からなるデータで、欠損値のある行はありません。
+
+```
+marketplace       - 2 letter country code of the marketplace where the review was written.
+customer_id       - Random identifier that can be used to aggregate reviews written by a single author.
+review_id         - The unique ID of the review.
+product_id        - The unique Product ID the review pertains to. In the multilingual dataset the reviews
+                    for the same product in different countries can be grouped by the same product_id.
+product_parent    - Random identifier that can be used to aggregate reviews for the same product.
+product_title     - Title of the product.
+product_category  - Broad product category that can be used to group reviews 
+                    (also used to group the dataset into coherent parts).
+star_rating       - The 1-5 star rating of the review.
+helpful_votes     - Number of helpful votes.
+total_votes       - Number of total votes the review received.
+vine              - Review was written as part of the Vine program.
+verified_purchase - The review is on a verified purchase.
+review_headline   - The title of the review.
+review_body       - The review text.
+review_date       - The date the review was written.
+```
+
+```{r}
+dt |>
+  dplyr::glimpse()
+```
+
+## 分析
+
+このデータセットには26万2000件ほどのレビューが収録されていますが、レビューのほとんどはVideo DVDカテゴリとMusicカテゴリのものです。その他のカテゴリのレビューをすべて足し合わせても、Musicカテゴリのレビューの数よりも少なく、そもそもレビューが数件しかないようなカテゴリもあります。
+
+また、商品の評価を表す星の数は5を付けているものが過半数であるほか、「このレビューが役に立った」の投票がないものがほとんどになっています。
+
+```r
+dt |>
+  dtplyr::lazy_dt(immutable = TRUE) |>
+  dplyr::select(review_id, product_category,
+                star_rating, helpful_votes, total_votes,
+                vine, verified_purchase,
+                review_headline, review_body,
+                review_date) |>
+  dplyr::mutate(
+    product_category = forcats::fct_lump(factor(product_category), n = 2),
+    star_rating = forcats::fct_lump(factor(star_rating), n = 2),
+    vine = factor(vine),
+    verified_purchase = factor(verified_purchase),
+    review_len = nchar(review_body),
+    review_month = factor(lubridate::month(review_date)),
+    review_wday = factor(lubridate::wday(review_date, label = TRUE))
+  ) |>
+  dplyr::select(!c(review_id, review_headline, review_body, review_date)) |>
+  dplyr::as_tibble() |>
+  DataExplorer::create_report(output_dir = "docs")
+```
+
+> [report](https://paithiov909.github.io/amazon-reviews/report.html)
+
+レビュー本文は短いものが多く、比較的よくレビューが書かれている商品カテゴリ以外では、とくに短くなりがちです。
+
+```{r}
+#| fig-cap: "Product reviews and their length"
+#| fig-alt: "Scatterplot of review counts vs. review lengths where points are colored by product categories."
+dt |>
+  dtplyr::lazy_dt(immutable = TRUE) |>
+  dplyr::select(review_id, product_category,
+                review_headline, review_body) |>
+  dplyr::mutate(
+    product_category = factor(product_category),
+    review_len = nchar(review_body)
+  ) |>
+  dplyr::filter(review_len > 50, review_len < 2000) |>
+  dplyr::summarise(
+    counts = dplyr::n(),
+    review_len = median(review_len),
+    .by = product_category
+  ) |>
+  dplyr::as_tibble() |>
+  ggplot2::ggplot(ggplot2::aes(x = counts, y = review_len, color = product_category)) +
+  ggplot2::geom_point() +
+  ggrepel::geom_text_repel(ggplot2::aes(label = product_category), max.overlaps = 15) +
+  ggplot2::scale_x_log10() +
+  ggplot2::theme(legend.position = "none") +
+  ggplot2::scale_colour_viridis_d(option = "turbo")
+```
+
+分類を簡単にするために、ここでは使用するデータをある程度の文字数のあるレビューに絞りつつ、Video DVDとMusic以外のカテゴリを一つにまとめることにします。
+
+```{r}
+#| fig-cap: "Density of review length"
+#| fig-alt: "Density plot of review length colored by product categories."
+dt |>
+  dtplyr::lazy_dt(immutable = TRUE) |>
+  dplyr::select(review_id, product_category,
+                review_headline, review_body) |>
+  dplyr::mutate(
+    product_category = forcats::fct_lump(factor(product_category), n = 2),
+    review_len = nchar(review_body)
+  ) |>
+  dplyr::select(product_category, review_len) |>
+  dplyr::as_tibble() |>
+  ggpubr::ggdensity(
+      "review_len",
+      y = "density",
+      color = "product_category",
+      palette = viridisLite::turbo(3)
+    ) |>
+  ggpubr::ggpar(xscale = "log10")
+```

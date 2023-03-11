@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 2 Summary | Rでやるランダムフォレスト</title>
+  <meta name="description" content="R（tidymodels）でrangerのランダムフォレストを使ってみます" />
+  <meta name="generator" content="bookdown 0.33 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 2 Summary | Rでやるランダムフォレスト" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="R（tidymodels）でrangerのランダムフォレストを使ってみます" />
+  <meta name="github-repo" content="paithiov909/amazon-reviews" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 2 Summary | Rでやるランダムフォレスト" />
+  
+  <meta name="twitter:description" content="R（tidymodels）でrangerのランダムフォレストを使ってみます" />
+  
+
+<meta name="author" content="Akiru Kato" />
+
+
+<meta name="date" content="2023-03-11" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="intro.html"/>
+<link rel="next" href="preprocess.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/core-js-2.5.3/shim.min.js"></script>
+<script src="libs/react-17.0.0/react.min.js"></script>
+<script src="libs/react-17.0.0/react-dom.min.js"></script>
+<script src="libs/reactwidget-1.0.0/react-tools.js"></script>
+<script src="libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
+<link href="libs/reactable-0.4.3/reactable.css" rel="stylesheet" />
+<script src="libs/reactable-binding-0.4.3/reactable.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>はじめに</a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#rangerのランダムフォレストについて"><i class="fa fa-check"></i><b>1.1</b> rangerのランダムフォレストについて</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#ハイパーパラメータ"><i class="fa fa-check"></i><b>1.2</b> ハイパーパラメータ</a>
+<ul>
+<li class="chapter" data-level="1.2.1" data-path="intro.html"><a href="intro.html#mtry木を作成するときに使う特徴量の数"><i class="fa fa-check"></i><b>1.2.1</b> mtry（木を作成するときに使う特徴量の数）</a></li>
+<li class="chapter" data-level="1.2.2" data-path="intro.html"><a href="intro.html#trees作成する木の数"><i class="fa fa-check"></i><b>1.2.2</b> trees（作成する木の数）</a></li>
+<li class="chapter" data-level="1.2.3" data-path="intro.html"><a href="intro.html#min_nノードサイズの下限値"><i class="fa fa-check"></i><b>1.2.3</b> min_n（ノードサイズの下限値）</a></li>
+</ul></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#その他の引数"><i class="fa fa-check"></i><b>1.3</b> その他の引数</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#imporatnce"><i class="fa fa-check"></i><b>1.3.1</b> imporatnce</a></li>
+<li class="chapter" data-level="1.3.2" data-path="intro.html"><a href="intro.html#num.threads"><i class="fa fa-check"></i><b>1.3.2</b> num.threads</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="summary.html"><a href="summary.html"><i class="fa fa-check"></i><b>2</b> Summary</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="summary.html"><a href="summary.html#データセット"><i class="fa fa-check"></i><b>2.1</b> データセット</a></li>
+<li class="chapter" data-level="2.2" data-path="summary.html"><a href="summary.html#分析"><i class="fa fa-check"></i><b>2.2</b> 分析</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="preprocess.html"><a href="preprocess.html"><i class="fa fa-check"></i><b>3</b> Preprocessing</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="preprocess.html"><a href="preprocess.html#前処理"><i class="fa fa-check"></i><b>3.1</b> 前処理</a></li>
+<li class="chapter" data-level="3.2" data-path="preprocess.html"><a href="preprocess.html#形態素解析の結果の確認"><i class="fa fa-check"></i><b>3.2</b> 形態素解析の結果の確認</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#ワークフローの作成"><i class="fa fa-check"></i><b>4.1</b> ワークフローの作成</a></li>
+<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#ハイパーパラメータの探索"><i class="fa fa-check"></i><b>4.2</b> ハイパーパラメータの探索</a></li>
+<li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#モデルの評価"><i class="fa fa-check"></i><b>4.3</b> モデルの評価</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i><b>5</b> Sessioninfo</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Rでやるランダムフォレスト</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="summary" class="section level1 hasAnchor" number="2">
+<h1><span class="header-section-number">Chapter 2</span> Summary<a href="summary.html#summary" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="データセット" class="section level2 hasAnchor" number="2.1">
+<h2><span class="header-section-number">2.1</span> データセット<a href="summary.html#データセット" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>ここではAmazonの商品レビューのデータセットを使用し、レビューの内容などをもとに、商品カテゴリを目的変数として分類することを試みます。</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="summary.html#cb2-1" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(<span class="st">&quot;https://s3.amazonaws.com/amazon-reviews-pds/tsv/amazon_reviews_multilingual_JP_v1_00.tsv.gz&quot;</span>, <span class="at">quote =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div>
+<p>このデータは、<a href="https://s3.amazonaws.com/amazon-reviews-pds/readme.html">Amazon Customer Reviews Dataset</a>のうち、日本語のレビューだけを抽出したものです。次の15列からなるデータで、欠損値のある行はありません。</p>
+<pre><code>marketplace       - 2 letter country code of the marketplace where the review was written.
+customer_id       - Random identifier that can be used to aggregate reviews written by a single author.
+review_id         - The unique ID of the review.
+product_id        - The unique Product ID the review pertains to. In the multilingual dataset the reviews
+                    for the same product in different countries can be grouped by the same product_id.
+product_parent    - Random identifier that can be used to aggregate reviews for the same product.
+product_title     - Title of the product.
+product_category  - Broad product category that can be used to group reviews 
+                    (also used to group the dataset into coherent parts).
+star_rating       - The 1-5 star rating of the review.
+helpful_votes     - Number of helpful votes.
+total_votes       - Number of total votes the review received.
+vine              - Review was written as part of the Vine program.
+verified_purchase - The review is on a verified purchase.
+review_headline   - The title of the review.
+review_body       - The review text.
+review_date       - The date the review was written.</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="summary.html#cb4-1" aria-hidden="true" tabindex="-1"></a>dt <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="summary.html#cb4-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">glimpse</span>()</span></code></pre></div>
+<pre><code>## Rows: 262,431
+## Columns: 15
+## $ marketplace       &lt;chr&gt; &quot;JP&quot;, &quot;JP&quot;, &quot;JP&quot;, &quot;JP&quot;, &quot;JP&quot;, &quot;JP&quot;, &quot;JP&quot;, &quot;JP&quot;, &quot;JP&quot;, &quot;JP&quot;, &quot;JP&quot;, &quot;JP…
+## $ customer_id       &lt;int&gt; 65317, 65317, 65696, 67162, 67701, 68380, 68655, 68973, 69080, 69552,…
+## $ review_id         &lt;chr&gt; &quot;R33RSUD4ZTRKT7&quot;, &quot;R2U1VB8GPZBBEH&quot;, &quot;R1IBRCJPPGWVJW&quot;, &quot;RL02CW5XLYONU&quot;…
+## $ product_id        &lt;chr&gt; &quot;B000001GBJ&quot;, &quot;B000YPWBQ2&quot;, &quot;B0002E5O9G&quot;, &quot;B00004SRJ5&quot;, &quot;B0093H8H8I&quot;,…
+## $ product_parent    &lt;int&gt; 957145596, 904244932, 108978277, 606528497, 509738390, 37188049, 9165…
+## $ product_title     &lt;chr&gt; &quot;SONGS FROM A SECRET GARDE&quot;, &quot;鏡の中の鏡‾ペルト作品集(SACD)(Arvo Part…
+## $ product_category  &lt;chr&gt; &quot;Music&quot;, &quot;Music&quot;, &quot;Music&quot;, &quot;Music&quot;, &quot;PC&quot;, &quot;Toys&quot;, &quot;Music&quot;, &quot;Electroni…
+## $ star_rating       &lt;int&gt; 1, 1, 5, 5, 4, 4, 5, 1, 5, 4, 3, 4, 5, 5, 5, 5, 5, 4, 4, 5, 5, 5, 5, …
+## $ helpful_votes     &lt;int&gt; 1, 4, 2, 6, 2, 2, 8, 3, 1, 1, 3, 0, 6, 1, 4, 1, 1, 3, 7, 8, 2, 1, 0, …
+## $ total_votes       &lt;int&gt; 15, 20, 3, 9, 4, 3, 13, 15, 2, 4, 6, 0, 9, 2, 6, 1, 1, 8, 14, 23, 4, …
+## $ vine              &lt;chr&gt; &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;, &quot;N&quot;,…
+## $ verified_purchase &lt;chr&gt; &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;,…
+## $ review_headline   &lt;chr&gt; &quot;残念ながら…&quot;, &quot;残念ながら…&quot;, &quot;ドリームキャスト&quot;, &quot;やっぱりマスト&quot;,…
+## $ review_body       &lt;chr&gt; &quot;残念ながら…趣味ではありませんでした。ケルト音楽の範疇にも幅があるの…
+## $ review_date       &lt;IDate&gt; 2012-12-05, 2012-12-05, 2013-03-02, 2013-08-11, 2013-02-10, 2014-02…</code></pre>
+</div>
+<div id="分析" class="section level2 hasAnchor" number="2.2">
+<h2><span class="header-section-number">2.2</span> 分析<a href="summary.html#分析" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>このデータセットには26万2000件ほどのレビューが収録されていますが、レビューのほとんどはVideo DVDカテゴリとMusicカテゴリのものです。その他のカテゴリのレビューをすべて足し合わせても、Musicカテゴリのレビューの数よりも少なく、そもそもレビューが数件しかないようなカテゴリもあります。</p>
+<p>また、商品の評価を表す星の数は5を付けているものが過半数であるほか、「このレビューが役に立った」の投票がないものがほとんどになっています。</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="summary.html#cb6-1" aria-hidden="true" tabindex="-1"></a>dt <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="summary.html#cb6-2" aria-hidden="true" tabindex="-1"></a>  dtplyr<span class="sc">::</span><span class="fu">lazy_dt</span>(<span class="at">immutable =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="summary.html#cb6-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(review_id, product_category,</span>
+<span id="cb6-4"><a href="summary.html#cb6-4" aria-hidden="true" tabindex="-1"></a>                star_rating, helpful_votes, total_votes,</span>
+<span id="cb6-5"><a href="summary.html#cb6-5" aria-hidden="true" tabindex="-1"></a>                vine, verified_purchase,</span>
+<span id="cb6-6"><a href="summary.html#cb6-6" aria-hidden="true" tabindex="-1"></a>                review_headline, review_body,</span>
+<span id="cb6-7"><a href="summary.html#cb6-7" aria-hidden="true" tabindex="-1"></a>                review_date) <span class="sc">|&gt;</span></span>
+<span id="cb6-8"><a href="summary.html#cb6-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-9"><a href="summary.html#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">product_category =</span> forcats<span class="sc">::</span><span class="fu">fct_lump</span>(<span class="fu">factor</span>(product_category), <span class="at">n =</span> <span class="dv">2</span>),</span>
+<span id="cb6-10"><a href="summary.html#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">star_rating =</span> forcats<span class="sc">::</span><span class="fu">fct_lump</span>(<span class="fu">factor</span>(star_rating), <span class="at">n =</span> <span class="dv">2</span>),</span>
+<span id="cb6-11"><a href="summary.html#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">vine =</span> <span class="fu">factor</span>(vine),</span>
+<span id="cb6-12"><a href="summary.html#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">verified_purchase =</span> <span class="fu">factor</span>(verified_purchase),</span>
+<span id="cb6-13"><a href="summary.html#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_len =</span> <span class="fu">nchar</span>(review_body),</span>
+<span id="cb6-14"><a href="summary.html#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_month =</span> <span class="fu">factor</span>(lubridate<span class="sc">::</span><span class="fu">month</span>(review_date)),</span>
+<span id="cb6-15"><a href="summary.html#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_wday =</span> <span class="fu">factor</span>(lubridate<span class="sc">::</span><span class="fu">wday</span>(review_date, <span class="at">label =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb6-16"><a href="summary.html#cb6-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb6-17"><a href="summary.html#cb6-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">!</span><span class="fu">c</span>(review_id, review_headline, review_body, review_date)) <span class="sc">|&gt;</span></span>
+<span id="cb6-18"><a href="summary.html#cb6-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-19"><a href="summary.html#cb6-19" aria-hidden="true" tabindex="-1"></a>  DataExplorer<span class="sc">::</span><span class="fu">create_report</span>(<span class="at">output_dir =</span> <span class="st">&quot;docs&quot;</span>)</span></code></pre></div>
+<blockquote>
+<p><a href="https://paithiov909.github.io/amazon-reviews/report.html">report</a></p>
+</blockquote>
+<p>レビュー本文は短いものが多く、比較的よくレビューが書かれている商品カテゴリ以外では、とくに短くなりがちです。</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="summary.html#cb7-1" aria-hidden="true" tabindex="-1"></a>dt <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="summary.html#cb7-2" aria-hidden="true" tabindex="-1"></a>  dtplyr<span class="sc">::</span><span class="fu">lazy_dt</span>(<span class="at">immutable =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="summary.html#cb7-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(review_id, product_category,</span>
+<span id="cb7-4"><a href="summary.html#cb7-4" aria-hidden="true" tabindex="-1"></a>                review_headline, review_body) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="summary.html#cb7-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb7-6"><a href="summary.html#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">product_category =</span> <span class="fu">factor</span>(product_category),</span>
+<span id="cb7-7"><a href="summary.html#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_len =</span> <span class="fu">nchar</span>(review_body)</span>
+<span id="cb7-8"><a href="summary.html#cb7-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-9"><a href="summary.html#cb7-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(review_len <span class="sc">&gt;</span> <span class="dv">50</span>, review_len <span class="sc">&lt;</span> <span class="dv">2000</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-10"><a href="summary.html#cb7-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb7-11"><a href="summary.html#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">counts =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(),</span>
+<span id="cb7-12"><a href="summary.html#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_len =</span> <span class="fu">median</span>(review_len),</span>
+<span id="cb7-13"><a href="summary.html#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> product_category</span>
+<span id="cb7-14"><a href="summary.html#cb7-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-15"><a href="summary.html#cb7-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-16"><a href="summary.html#cb7-16" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> counts, <span class="at">y =</span> review_len, <span class="at">color =</span> product_category)) <span class="sc">+</span></span>
+<span id="cb7-17"><a href="summary.html#cb7-17" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb7-18"><a href="summary.html#cb7-18" aria-hidden="true" tabindex="-1"></a>  ggrepel<span class="sc">::</span><span class="fu">geom_text_repel</span>(ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">label =</span> product_category), <span class="at">max.overlaps =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
+<span id="cb7-19"><a href="summary.html#cb7-19" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
+<span id="cb7-20"><a href="summary.html#cb7-20" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb7-21"><a href="summary.html#cb7-21" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">scale_colour_viridis_d</span>(<span class="at">option =</span> <span class="st">&quot;turbo&quot;</span>)</span></code></pre></div>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-5"></span>
+<img src="_main_files/figure-html/unnamed-chunk-5-1.png" alt="Scatterplot of review counts vs. review lengths where points are colored by product categories." width="672" />
+<p class="caption">
+Figure 2.1: Product reviews and their length
+</p>
+</div>
+<p>分類を簡単にするために、ここでは使用するデータをある程度の文字数のあるレビューに絞りつつ、Video DVDとMusic以外のカテゴリを一つにまとめることにします。</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="summary.html#cb8-1" aria-hidden="true" tabindex="-1"></a>dt <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="summary.html#cb8-2" aria-hidden="true" tabindex="-1"></a>  dtplyr<span class="sc">::</span><span class="fu">lazy_dt</span>(<span class="at">immutable =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="summary.html#cb8-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(review_id, product_category,</span>
+<span id="cb8-4"><a href="summary.html#cb8-4" aria-hidden="true" tabindex="-1"></a>                review_headline, review_body) <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="summary.html#cb8-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb8-6"><a href="summary.html#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">product_category =</span> forcats<span class="sc">::</span><span class="fu">fct_lump</span>(<span class="fu">factor</span>(product_category), <span class="at">n =</span> <span class="dv">2</span>),</span>
+<span id="cb8-7"><a href="summary.html#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_len =</span> <span class="fu">nchar</span>(review_body)</span>
+<span id="cb8-8"><a href="summary.html#cb8-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-9"><a href="summary.html#cb8-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(product_category, review_len) <span class="sc">|&gt;</span></span>
+<span id="cb8-10"><a href="summary.html#cb8-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-11"><a href="summary.html#cb8-11" aria-hidden="true" tabindex="-1"></a>  ggpubr<span class="sc">::</span><span class="fu">ggdensity</span>(</span>
+<span id="cb8-12"><a href="summary.html#cb8-12" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;review_len&quot;</span>,</span>
+<span id="cb8-13"><a href="summary.html#cb8-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">&quot;density&quot;</span>,</span>
+<span id="cb8-14"><a href="summary.html#cb8-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">&quot;product_category&quot;</span>,</span>
+<span id="cb8-15"><a href="summary.html#cb8-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">palette =</span> viridisLite<span class="sc">::</span><span class="fu">turbo</span>(<span class="dv">3</span>)</span>
+<span id="cb8-16"><a href="summary.html#cb8-16" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb8-17"><a href="summary.html#cb8-17" aria-hidden="true" tabindex="-1"></a>  ggpubr<span class="sc">::</span><span class="fu">ggpar</span>(<span class="at">xscale =</span> <span class="st">&quot;log10&quot;</span>)</span></code></pre></div>
+<div class="figure"><span style="display:block;" id="fig:unnamed-chunk-6"></span>
+<img src="_main_files/figure-html/unnamed-chunk-6-1.png" alt="Density plot of review length colored by product categories." width="672" />
+<p class="caption">
+Figure 2.2: Density of review length
+</p>
+</div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="intro.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="preprocess.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
