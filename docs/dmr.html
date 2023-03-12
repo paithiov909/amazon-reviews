@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 5 DMR | Rでやるランダムフォレスト</title>
+  <meta name="description" content="R（tidymodels）でrangerのランダムフォレストを使ってみます" />
+  <meta name="generator" content="bookdown 0.33 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 5 DMR | Rでやるランダムフォレスト" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="R（tidymodels）でrangerのランダムフォレストを使ってみます" />
+  <meta name="github-repo" content="paithiov909/amazon-reviews" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 5 DMR | Rでやるランダムフォレスト" />
+  
+  <meta name="twitter:description" content="R（tidymodels）でrangerのランダムフォレストを使ってみます" />
+  
+
+<meta name="author" content="Akiru Kato" />
+
+
+<meta name="date" content="2023-03-12" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="modeling.html"/>
+<link rel="next" href="session.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/core-js-2.5.3/shim.min.js"></script>
+<script src="libs/react-17.0.0/react.min.js"></script>
+<script src="libs/react-17.0.0/react-dom.min.js"></script>
+<script src="libs/reactwidget-1.0.0/react-tools.js"></script>
+<script src="libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
+<link href="libs/reactable-0.4.3/reactable.css" rel="stylesheet" />
+<script src="libs/reactable-binding-0.4.3/reactable.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>はじめに</a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#rangerのランダムフォレストについて"><i class="fa fa-check"></i><b>1.1</b> rangerのランダムフォレストについて</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#ハイパーパラメータ"><i class="fa fa-check"></i><b>1.2</b> ハイパーパラメータ</a>
+<ul>
+<li class="chapter" data-level="1.2.1" data-path="intro.html"><a href="intro.html#mtry木を作成するときに使う特徴量の数"><i class="fa fa-check"></i><b>1.2.1</b> mtry（木を作成するときに使う特徴量の数）</a></li>
+<li class="chapter" data-level="1.2.2" data-path="intro.html"><a href="intro.html#trees作成する木の数"><i class="fa fa-check"></i><b>1.2.2</b> trees（作成する木の数）</a></li>
+<li class="chapter" data-level="1.2.3" data-path="intro.html"><a href="intro.html#min_nノードサイズの下限値"><i class="fa fa-check"></i><b>1.2.3</b> min_n（ノードサイズの下限値）</a></li>
+</ul></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#その他の引数"><i class="fa fa-check"></i><b>1.3</b> その他の引数</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#importance"><i class="fa fa-check"></i><b>1.3.1</b> importance</a></li>
+<li class="chapter" data-level="1.3.2" data-path="intro.html"><a href="intro.html#num.threads"><i class="fa fa-check"></i><b>1.3.2</b> num.threads</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="summary.html"><a href="summary.html"><i class="fa fa-check"></i><b>2</b> Summary</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="summary.html"><a href="summary.html#データセット"><i class="fa fa-check"></i><b>2.1</b> データセット</a></li>
+<li class="chapter" data-level="2.2" data-path="summary.html"><a href="summary.html#分析"><i class="fa fa-check"></i><b>2.2</b> 分析</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="preprocess.html"><a href="preprocess.html"><i class="fa fa-check"></i><b>3</b> Preprocessing</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="preprocess.html"><a href="preprocess.html#前処理"><i class="fa fa-check"></i><b>3.1</b> 前処理</a></li>
+<li class="chapter" data-level="3.2" data-path="preprocess.html"><a href="preprocess.html#形態素解析の結果の確認"><i class="fa fa-check"></i><b>3.2</b> 形態素解析の結果の確認</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="modeling.html"><a href="modeling.html"><i class="fa fa-check"></i><b>4</b> Modeling</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="modeling.html"><a href="modeling.html#ワークフローの作成"><i class="fa fa-check"></i><b>4.1</b> ワークフローの作成</a></li>
+<li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#ハイパーパラメータの探索"><i class="fa fa-check"></i><b>4.2</b> ハイパーパラメータの探索</a></li>
+<li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#モデルの評価"><i class="fa fa-check"></i><b>4.3</b> モデルの評価</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="dmr.html"><a href="dmr.html"><i class="fa fa-check"></i><b>5</b> DMR</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="dmr.html"><a href="dmr.html#dmrdistributed-multinomial-regression"><i class="fa fa-check"></i><b>5.1</b> DMR（distributed multinomial regression）</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i>Sessioninfo</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Rでやるランダムフォレスト</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="dmr" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">Chapter 5</span> DMR<a href="dmr.html#dmr" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>予測そのものよりも、ようするに変数重要度を確認したいというのが主な目的の場合（いわゆる「架空の予測問題」を解く場合）、「DMR（distributed multinomial regression）」という手法が便利かもしれません。</p>
+<div id="dmrdistributed-multinomial-regression" class="section level2 hasAnchor" number="5.1">
+<h2><span class="header-section-number">5.1</span> DMR（distributed multinomial regression）<a href="dmr.html#dmrdistributed-multinomial-regression" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>DMR（distributed multinomial regression）は、<span class="citation">Taddy (<a href="#ref-Taddy2015" role="doc-biblioref">2015</a>)</span> で提案された手法で、雑に言うと多項ロジスティック回帰を高次元のデータでも速くできるようにしたものです。<a href="https://cran.r-project.org/package=distrom">distrom</a>というRパッケージから使えます。</p>
+<p>DMRはたとえば次のようにして実行します。product_categoryについては順序がないので、ここではダミー変数化しています。</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="dmr.html#cb23-1" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> corp_train <span class="sc">|&gt;</span></span>
+<span id="cb23-2"><a href="dmr.html#cb23-2" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">corpus</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="dmr.html#cb23-3" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">tokens</span>(<span class="at">what =</span> <span class="st">&quot;fastestword&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a href="dmr.html#cb23-4" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm</span>() <span class="sc">|&gt;</span></span>
+<span id="cb23-5"><a href="dmr.html#cb23-5" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm_trim</span>(<span class="at">min_termfreq =</span> <span class="dv">100</span>, <span class="at">max_termfreq =</span> <span class="fl">1e4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-6"><a href="dmr.html#cb23-6" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm_tfidf</span>() <span class="sc">|&gt;</span></span>
+<span id="cb23-7"><a href="dmr.html#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">&quot;dgCMatrix&quot;</span>)</span>
+<span id="cb23-8"><a href="dmr.html#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="dmr.html#cb23-9" aria-hidden="true" tabindex="-1"></a>covars <span class="ot">&lt;-</span> corp_train <span class="sc">|&gt;</span></span>
+<span id="cb23-10"><a href="dmr.html#cb23-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(product_category, star_rating) <span class="sc">|&gt;</span></span>
+<span id="cb23-11"><a href="dmr.html#cb23-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
+<span id="cb23-12"><a href="dmr.html#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">pc_video_dvd =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(product_category <span class="sc">==</span> <span class="st">&quot;Video DVD&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb23-13"><a href="dmr.html#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">pc_music =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(product_category <span class="sc">==</span> <span class="st">&quot;Music&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb23-14"><a href="dmr.html#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">pc_other =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(product_category <span class="sc">==</span> <span class="st">&quot;Other&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb23-15"><a href="dmr.html#cb23-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">star_rating =</span> <span class="fu">as.integer</span>(star_rating)</span>
+<span id="cb23-16"><a href="dmr.html#cb23-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb23-17"><a href="dmr.html#cb23-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>() <span class="sc">|&gt;</span></span>
+<span id="cb23-18"><a href="dmr.html#cb23-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">&quot;dgCMatrix&quot;</span>)</span>
+<span id="cb23-19"><a href="dmr.html#cb23-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-20"><a href="dmr.html#cb23-20" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">&lt;-</span></span>
+<span id="cb23-21"><a href="dmr.html#cb23-21" aria-hidden="true" tabindex="-1"></a>  parallel<span class="sc">::</span><span class="fu">makeCluster</span>(</span>
+<span id="cb23-22"><a href="dmr.html#cb23-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">max</span>(<span class="dv">1</span>, parallel<span class="sc">::</span><span class="fu">detectCores</span>() <span class="sc">-</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-23"><a href="dmr.html#cb23-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-24"><a href="dmr.html#cb23-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-25"><a href="dmr.html#cb23-25" aria-hidden="true" tabindex="-1"></a>ret <span class="ot">&lt;-</span></span>
+<span id="cb23-26"><a href="dmr.html#cb23-26" aria-hidden="true" tabindex="-1"></a>  distrom<span class="sc">::</span><span class="fu">dmr</span>(</span>
+<span id="cb23-27"><a href="dmr.html#cb23-27" aria-hidden="true" tabindex="-1"></a>    cl,</span>
+<span id="cb23-28"><a href="dmr.html#cb23-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">covars =</span> covars,</span>
+<span id="cb23-29"><a href="dmr.html#cb23-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">counts =</span> mat</span>
+<span id="cb23-30"><a href="dmr.html#cb23-30" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-31"><a href="dmr.html#cb23-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-32"><a href="dmr.html#cb23-32" aria-hidden="true" tabindex="-1"></a>parallel<span class="sc">::</span><span class="fu">stopCluster</span>(cl)</span></code></pre></div>
+<p>coefficientsが大きい特徴量を確認します。</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="dmr.html#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ret)[<span class="st">&quot;pc_video_dvd&quot;</span>,] <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="dmr.html#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a href="dmr.html#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">50</span>)</span></code></pre></div>
+<pre><code>##           声優 ターミネーター           上映           宮崎       吹き替え           監督 
+##       4.531380       3.853567       3.516524       3.371827       3.221108       3.103991 
+##       キャスト           演技           役者           劇場           娯楽             cg 
+##       2.877815       2.752172       2.702536       2.689291       2.685808       2.653322 
+##   ラストシーン           観る     リアリティ       シーズン     アカデミー           俳優 
+##       2.629915       2.593171       2.582959       2.579233       2.567552       2.539110 
+##           脚本           特典           見所         シーン             役           公開 
+##       2.459971       2.459964       2.395294       2.330210       2.316472       2.265206 
+##           正義   スピルバーグ           放映             館            blu           レイ 
+##       2.257692       2.247745       2.216671       2.216081       2.212462       2.203985 
+##         ブルー         演じる           吹替           復讐           台詞       ヒーロー 
+##       2.180158       2.177377       2.159551       2.138070       2.126201       2.119079 
+##         アニメ           戦い       ヒロイン           刑事           戦闘           出演 
+##       2.116731       2.106475       2.102385       2.065506       2.058139       2.032843 
+##     バットマン     サスペンス       ホームズ           女優           戦争           悪役 
+##       2.021464       1.966226       1.959172       1.956910       1.956398       1.918113 
+##           恐怖       リメイク 
+##       1.916225       1.911121</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="dmr.html#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ret)[<span class="st">&quot;pc_music&quot;</span>,] <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a href="dmr.html#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="dmr.html#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">50</span>)</span></code></pre></div>
+<pre><code>##             sacd           ビート アコースティック         アルバム             リフ 
+##         5.564642         5.460718         4.694369         4.549915         4.387598 
+##               lp   ロックンロール             曲調           パンク       ヴォーカル 
+##         4.347881         4.296106         4.274276         4.227198         4.200279 
+##             必聴       スラッシュ               vo         リスナー         マイルス 
+##         4.173485         4.030557         4.028758         3.973202         3.972505 
+##         バラード           メタル           ギター             ソロ       ストーンズ 
+##         3.840403         3.766170         3.761472         3.700822         3.517525 
+##             全曲         ボーカル   レコーディング         メロディ               st 
+##         3.487658         3.474896         3.461134         3.441243         3.390878 
+##               nd           ポップ               曲             楽曲     プロデュース 
+##         3.386917         3.316588         3.303455         3.274317         3.252896 
+##             聴く       ギタリスト             楽器           ドラム       メロディー 
+##         3.252538         3.170178         3.167700         3.158917         3.147558 
+##         シングル           バンド       キャッチー       クラプトン         モノラル 
+##         3.107950         3.105368         3.105220         3.091808         3.070800 
+##             脱退               rd       カントリー       ビートルズ           ロック 
+##         3.049162         3.015861         3.001146         2.993426         2.980474 
+##           聴ける           ジャケ             rock           ジャズ         レコード 
+##         2.961248         2.952392         2.950065         2.934386         2.841200</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="dmr.html#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ret)[<span class="st">&quot;pc_other&quot;</span>,] <span class="sc">|&gt;</span></span>
+<span id="cb28-2"><a href="dmr.html#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="dmr.html#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">50</span>)</span></code></pre></div>
+<pre><code>##       kindle       atilde          ;&amp;#       アプリ         充電         純正       レンズ 
+##     6.335462     6.290259     6.001140     5.752085     5.309685     5.054201     5.015425 
+##          usb   バッテリー         接続         著者           ;&amp; インストール         book 
+##     4.917993     4.402027     4.238265     4.172025     4.164973     4.081835     3.943654 
+##         動作         本体     ケーブル       パーツ       使える           冊         電源 
+##     3.942407     3.837859     3.825347     3.705331     3.689106     3.666314     3.598223 
+##         便利       ボタン         無料         機能         遊ぶ       ページ       サイズ 
+##     3.471980     3.182765     2.996116     2.937164     2.794061     2.704640     2.626639 
+##           pc         文章         使用         操作         交換         製品         絵本 
+##     2.607167     2.590672     2.539638     2.538409     2.497666     2.463607     2.419834 
+##         付属           書           用          was         試す       データ         読む 
+##     2.312074     2.310120     2.306234     2.281336     2.270339     2.258409     2.117860 
+##        story         表示         貼る           as           式           台         have 
+##     2.100581     2.070926     2.042347     2.039030     1.963620     1.926075     1.904731 
+##         ヶ月 
+##     1.885448</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="dmr.html#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ret)[<span class="st">&quot;star_rating&quot;</span>,] <span class="sc">|&gt;</span></span>
+<span id="cb30-2"><a href="dmr.html#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sort</span>(<span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb30-3"><a href="dmr.html#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">50</span>)</span></code></pre></div>
+<pre><code>##           最低           駄作           酷い       がっかり         ひどい       中途半端 
+##      1.5704273      1.4536477      1.3218056      1.2388505      1.1423510      1.1070474 
+##           最悪     つまらない         ゴジラ   インストール           退屈              _ 
+##      0.9933692      0.9549500      0.9522552      0.9316276      0.8597217      0.8538243 
+##           ダメ           肝心       イマイチ         やめる           声優       メーカー 
+##      0.8022930      0.7714719      0.7467446      0.7001536      0.6878111      0.6873070 
+##         欠ける       いまいち           無駄         ボンド           不足           怪獣 
+##      0.6761385      0.6724465      0.6678372      0.6668025      0.6607413      0.6592544 
+##           微妙           失敗           吹替         マニア           売る         コピー 
+##      0.6588799      0.6377653      0.6340494      0.6307099      0.5852692      0.5724463 
+##       アマゾン           残念             傷           貼る           試す           お金 
+##      0.5501947      0.5305893      0.5297553      0.5179530      0.5148472      0.5076761 
+##           結局           悪い           販売           全く         なんで             旧 
+##      0.5021539      0.4981619      0.4887589      0.4814328      0.4812368      0.4792993 
+##       安っぽい           移入           二つ         すぎる ターミネーター         kindle 
+##      0.4639137      0.4625728      0.4496884      0.4471619      0.4448238      0.4392495 
+##           届く       それなり 
+##      0.4369202      0.4345080</code></pre>
+
+</div>
+</div>
+<h3>References<a href="references.html#references" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-Taddy2015" class="csl-entry">
+Taddy, Matt. 2015. <span>“Distributed Multinomial Regression.”</span> <em>The Annals of Applied Statistics</em> 9 (3). <a href="https://doi.org/10.1214/15-aoas831">https://doi.org/10.1214/15-aoas831</a>.
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="modeling.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="session.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 5 Sessioninfo | Rでやるランダムフォレスト</title>
+  <title>Sessioninfo | Rでやるランダムフォレスト</title>
   <meta name="description" content="R（tidymodels）でrangerのランダムフォレストを使ってみます" />
   <meta name="generator" content="bookdown 0.33 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 5 Sessioninfo | Rでやるランダムフォレスト" />
+  <meta property="og:title" content="Sessioninfo | Rでやるランダムフォレスト" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="R（tidymodels）でrangerのランダムフォレストを使ってみます" />
   <meta name="github-repo" content="paithiov909/amazon-reviews" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 5 Sessioninfo | Rでやるランダムフォレスト" />
+  <meta name="twitter:title" content="Sessioninfo | Rでやるランダムフォレスト" />
   
   <meta name="twitter:description" content="R（tidymodels）でrangerのランダムフォレストを使ってみます" />
   
@@ -23,14 +23,14 @@
 <meta name="author" content="Akiru Kato" />
 
 
-<meta name="date" content="2023-03-11" />
+<meta name="date" content="2023-03-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="modeling.html"/>
+<link rel="prev" href="dmr.html"/>
 <link rel="next" href="references.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -174,7 +174,7 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#その他の引数"><i class="fa fa-check"></i><b>1.3</b> その他の引数</a>
 <ul>
-<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#imporatnce"><i class="fa fa-check"></i><b>1.3.1</b> imporatnce</a></li>
+<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#importance"><i class="fa fa-check"></i><b>1.3.1</b> importance</a></li>
 <li class="chapter" data-level="1.3.2" data-path="intro.html"><a href="intro.html#num.threads"><i class="fa fa-check"></i><b>1.3.2</b> num.threads</a></li>
 </ul></li>
 </ul></li>
@@ -194,7 +194,11 @@ div.csl-indent {
 <li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#ハイパーパラメータの探索"><i class="fa fa-check"></i><b>4.2</b> ハイパーパラメータの探索</a></li>
 <li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#モデルの評価"><i class="fa fa-check"></i><b>4.3</b> モデルの評価</a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i><b>5</b> Sessioninfo</a></li>
+<li class="chapter" data-level="5" data-path="dmr.html"><a href="dmr.html"><i class="fa fa-check"></i><b>5</b> DMR</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="dmr.html"><a href="dmr.html#dmrdistributed-multinomial-regression"><i class="fa fa-check"></i><b>5.1</b> DMR（distributed multinomial regression）</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i>Sessioninfo</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 </ul>
 
@@ -213,10 +217,10 @@ div.csl-indent {
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="session" class="section level1 hasAnchor" number="5">
-<h1><span class="header-section-number">Chapter 5</span> Sessioninfo<a href="session.html#session" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="session.html#cb24-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span></code></pre></div>
-<pre><code>## ─ Session info ────────────────────────────────────────────────────────────────────────────────
+<div id="session" class="section level1 unnumbered hasAnchor">
+<h1>Sessioninfo<a href="session.html#session" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="session.html#cb32-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span></code></pre></div>
+<pre><code>## ─ Session info ──────────────────────────────────────────────────────────────────────────────
 ##  setting  value
 ##  version  R version 4.2.2 Patched (2022-11-10 r83330)
 ##  os       Ubuntu 22.04.2 LTS
@@ -226,11 +230,11 @@ div.csl-indent {
 ##  collate  ja_JP.UTF-8
 ##  ctype    ja_JP.UTF-8
 ##  tz       Asia/Tokyo
-##  date     2023-03-11
+##  date     2023-03-12
 ##  rstudio  2022.12.0+353 Elsbeth Geranium (server)
 ##  pandoc   2.19.2 @ /usr/lib/rstudio-server/bin/quarto/bin/tools/ (via rmarkdown)
 ## 
-## ─ Packages ────────────────────────────────────────────────────────────────────────────────────
+## ─ Packages ──────────────────────────────────────────────────────────────────────────────────
 ##  package            * version    date (UTC) lib source
 ##  abind                1.4-5      2016-07-21 [3] CRAN (R 4.0.1)
 ##  audubon              0.5.0      2023-02-26 [1] https://paithiov909.r-universe.dev (R 4.2.2)
@@ -255,6 +259,7 @@ div.csl-indent {
 ##  dials              * 1.1.0      2022-11-04 [1] RSPM (R 4.2.0)
 ##  DiceDesign           1.9        2021-02-13 [1] RSPM (R 4.2.0)
 ##  digest               0.6.31     2022-12-11 [3] RSPM (R 4.2.0)
+##  distrom              1.0.1      2022-03-29 [1] RSPM (R 4.2.0)
 ##  dplyr              * 1.1.0      2023-01-29 [3] RSPM (R 4.2.0)
 ##  dtplyr               1.3.0      2023-02-24 [1] CRAN (R 4.2.2)
 ##  ellipsis             0.3.2      2021-04-29 [3] CRAN (R 4.1.1)
@@ -268,6 +273,7 @@ div.csl-indent {
 ##  furrr                0.3.1      2022-08-15 [3] RSPM (R 4.2.0)
 ##  future               1.31.0     2023-02-01 [3] RSPM (R 4.2.0)
 ##  future.apply         1.10.0     2022-11-05 [3] RSPM (R 4.2.0)
+##  gamlr                1.13-7     2021-05-07 [1] RSPM (R 4.2.0)
 ##  generics             0.1.3      2022-07-05 [3] RSPM (R 4.2.0)
 ##  ggplot2            * 3.4.1      2023-02-10 [3] RSPM (R 4.2.0)
 ##  ggpubr               0.6.0      2023-02-10 [1] CRAN (R 4.2.2)
@@ -314,7 +320,7 @@ div.csl-indent {
 ##  prodlim              2019.11.13 2019-11-17 [3] RSPM (R 4.2.0)
 ##  purrr              * 1.0.1      2023-01-10 [3] RSPM (R 4.2.0)
 ##  quanteda             3.2.4      2022-12-08 [1] RSPM (R 4.2.0)
-##  quanteda.textstats   0.96       2022-09-19 [1] RSPM (R 4.2.0)
+##  quanteda.textstats   0.96.1     2023-03-08 [1] RSPM (R 4.2.0)
 ##  R.methodsS3          1.8.2      2022-06-13 [3] RSPM (R 4.2.0)
 ##  R.oo                 1.25.0     2022-06-12 [3] RSPM (R 4.2.0)
 ##  R.utils              2.12.2     2022-11-11 [3] RSPM (R 4.2.0)
@@ -368,7 +374,7 @@ div.csl-indent {
 ##  [3] /usr/lib/R/site-library
 ##  [4] /usr/lib/R/library
 ## 
-## ───────────────────────────────────────────────────────────────────────────────────────────────</code></pre>
+## ─────────────────────────────────────────────────────────────────────────────────────────────</code></pre>
 
 </div>
             </section>
@@ -376,7 +382,7 @@ div.csl-indent {
           </div>
         </div>
       </div>
-<a href="modeling.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="dmr.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 <a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>

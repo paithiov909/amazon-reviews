@@ -23,7 +23,7 @@
 <meta name="author" content="Akiru Kato" />
 
 
-<meta name="date" content="2023-03-11" />
+<meta name="date" content="2023-03-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -31,7 +31,7 @@
   
   
 <link rel="prev" href="preprocess.html"/>
-<link rel="next" href="session.html"/>
+<link rel="next" href="dmr.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -174,7 +174,7 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#その他の引数"><i class="fa fa-check"></i><b>1.3</b> その他の引数</a>
 <ul>
-<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#imporatnce"><i class="fa fa-check"></i><b>1.3.1</b> imporatnce</a></li>
+<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#importance"><i class="fa fa-check"></i><b>1.3.1</b> importance</a></li>
 <li class="chapter" data-level="1.3.2" data-path="intro.html"><a href="intro.html#num.threads"><i class="fa fa-check"></i><b>1.3.2</b> num.threads</a></li>
 </ul></li>
 </ul></li>
@@ -194,7 +194,11 @@ div.csl-indent {
 <li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#ハイパーパラメータの探索"><i class="fa fa-check"></i><b>4.2</b> ハイパーパラメータの探索</a></li>
 <li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#モデルの評価"><i class="fa fa-check"></i><b>4.3</b> モデルの評価</a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i><b>5</b> Sessioninfo</a></li>
+<li class="chapter" data-level="5" data-path="dmr.html"><a href="dmr.html"><i class="fa fa-check"></i><b>5</b> DMR</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="dmr.html"><a href="dmr.html#dmrdistributed-multinomial-regression"><i class="fa fa-check"></i><b>5.1</b> DMR（distributed multinomial regression）</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i>Sessioninfo</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 </ul>
 
@@ -218,76 +222,76 @@ div.csl-indent {
 <div id="ワークフローの作成" class="section level2 hasAnchor" number="4.1">
 <h2><span class="header-section-number">4.1</span> ワークフローの作成<a href="modeling.html#ワークフローの作成" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>ランダムフォレストのモデルを作成します。はじめに、モデルの学習に使うデータセットを分割します。</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="modeling.html#cb14-1" aria-hidden="true" tabindex="-1"></a>corp_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(corp, <span class="sc">!</span>doc_id), <span class="at">strata =</span> product_category)</span>
-<span id="cb14-2"><a href="modeling.html#cb14-2" aria-hidden="true" tabindex="-1"></a>corp_train <span class="ot">&lt;-</span> <span class="fu">training</span>(corp_split)</span>
-<span id="cb14-3"><a href="modeling.html#cb14-3" aria-hidden="true" tabindex="-1"></a>corp_test <span class="ot">&lt;-</span> <span class="fu">testing</span>(corp_split)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="modeling.html#cb13-1" aria-hidden="true" tabindex="-1"></a>corp_split <span class="ot">&lt;-</span> <span class="fu">initial_split</span>(dplyr<span class="sc">::</span><span class="fu">select</span>(corp, <span class="sc">!</span>doc_id), <span class="at">strata =</span> product_category)</span>
+<span id="cb13-2"><a href="modeling.html#cb13-2" aria-hidden="true" tabindex="-1"></a>corp_train <span class="ot">&lt;-</span> <span class="fu">training</span>(corp_split)</span>
+<span id="cb13-3"><a href="modeling.html#cb13-3" aria-hidden="true" tabindex="-1"></a>corp_test <span class="ot">&lt;-</span> <span class="fu">testing</span>(corp_split)</span></code></pre></div>
 <p>ワークフローを作成します。</p>
 <p>先ほど形態素解析の結果について確認したとき、「映画」という語がコーパス全体の75%で1万回出ないくらいでしたが、これは特徴量として拾ってほしいので、<code>textrecipes::step_tokenfilter</code>の<code>max_times</code>は<code>1e4</code>とします。</p>
 <p>また、コーパス全体の75%で語彙数が2000まではいかないくらいだったので、<code>max_tokens</code>はとりあえず<code>300</code>にしておきます。</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="modeling.html#cb15-1" aria-hidden="true" tabindex="-1"></a>ranger_spec <span class="ot">&lt;-</span></span>
-<span id="cb15-2"><a href="modeling.html#cb15-2" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">rand_forest</span>(</span>
-<span id="cb15-3"><a href="modeling.html#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mtry =</span> tune<span class="sc">::</span><span class="fu">tune</span>(),</span>
-<span id="cb15-4"><a href="modeling.html#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">trees =</span> tune<span class="sc">::</span><span class="fu">tune</span>()</span>
-<span id="cb15-5"><a href="modeling.html#cb15-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb15-6"><a href="modeling.html#cb15-6" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(</span>
-<span id="cb15-7"><a href="modeling.html#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ranger&quot;</span>,</span>
-<span id="cb15-8"><a href="modeling.html#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">importance =</span> <span class="st">&quot;impurity&quot;</span>,</span>
-<span id="cb15-9"><a href="modeling.html#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">num.threads =</span> <span class="fu">max</span>(<span class="dv">1</span>, parallel<span class="sc">::</span><span class="fu">detectCores</span>() <span class="sc">-</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb15-10"><a href="modeling.html#cb15-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb15-11"><a href="modeling.html#cb15-11" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">&quot;classification&quot;</span>)</span>
-<span id="cb15-12"><a href="modeling.html#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-13"><a href="modeling.html#cb15-13" aria-hidden="true" tabindex="-1"></a>tfidf_rec <span class="ot">&lt;-</span></span>
-<span id="cb15-14"><a href="modeling.html#cb15-14" aria-hidden="true" tabindex="-1"></a>  recipes<span class="sc">::</span><span class="fu">recipe</span>(product_category <span class="sc">~</span> ., <span class="at">data =</span> corp_train) <span class="sc">|&gt;</span></span>
-<span id="cb15-15"><a href="modeling.html#cb15-15" aria-hidden="true" tabindex="-1"></a>  recipes<span class="sc">::</span><span class="fu">step_YeoJohnson</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb15-16"><a href="modeling.html#cb15-16" aria-hidden="true" tabindex="-1"></a>  themis<span class="sc">::</span><span class="fu">step_downsample</span>(product_category, <span class="at">under_ratio =</span> <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-17"><a href="modeling.html#cb15-17" aria-hidden="true" tabindex="-1"></a>  textrecipes<span class="sc">::</span><span class="fu">step_tokenize</span>(text, <span class="at">custom_token =</span> \(x) { <span class="fu">strsplit</span>(x, <span class="st">&quot; &quot;</span>, <span class="at">fixed =</span> <span class="cn">TRUE</span>) }) <span class="sc">|&gt;</span></span>
-<span id="cb15-18"><a href="modeling.html#cb15-18" aria-hidden="true" tabindex="-1"></a>  textrecipes<span class="sc">::</span><span class="fu">step_tokenfilter</span>(text, <span class="at">min_times =</span> <span class="dv">100</span>, <span class="at">max_times =</span> <span class="fl">1e4</span>, <span class="at">max_tokens =</span> <span class="dv">300</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-19"><a href="modeling.html#cb15-19" aria-hidden="true" tabindex="-1"></a>  textrecipes<span class="sc">::</span><span class="fu">step_tfidf</span>(text, <span class="at">sublinear_tf =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb15-20"><a href="modeling.html#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-21"><a href="modeling.html#cb15-21" aria-hidden="true" tabindex="-1"></a>corp_wflow <span class="ot">&lt;-</span></span>
-<span id="cb15-22"><a href="modeling.html#cb15-22" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
-<span id="cb15-23"><a href="modeling.html#cb15-23" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(ranger_spec) <span class="sc">|&gt;</span></span>
-<span id="cb15-24"><a href="modeling.html#cb15-24" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(tfidf_rec)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="modeling.html#cb14-1" aria-hidden="true" tabindex="-1"></a>ranger_spec <span class="ot">&lt;-</span></span>
+<span id="cb14-2"><a href="modeling.html#cb14-2" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">rand_forest</span>(</span>
+<span id="cb14-3"><a href="modeling.html#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mtry =</span> tune<span class="sc">::</span><span class="fu">tune</span>(),</span>
+<span id="cb14-4"><a href="modeling.html#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">trees =</span> 300L,</span>
+<span id="cb14-5"><a href="modeling.html#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">min_n =</span> 5L</span>
+<span id="cb14-6"><a href="modeling.html#cb14-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="modeling.html#cb14-7" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_engine</span>(</span>
+<span id="cb14-8"><a href="modeling.html#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ranger&quot;</span>,</span>
+<span id="cb14-9"><a href="modeling.html#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">importance =</span> <span class="st">&quot;impurity&quot;</span>,</span>
+<span id="cb14-10"><a href="modeling.html#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">num.threads =</span> <span class="fu">max</span>(<span class="dv">1</span>, parallel<span class="sc">::</span><span class="fu">detectCores</span>() <span class="sc">-</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-11"><a href="modeling.html#cb14-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb14-12"><a href="modeling.html#cb14-12" aria-hidden="true" tabindex="-1"></a>  parsnip<span class="sc">::</span><span class="fu">set_mode</span>(<span class="st">&quot;classification&quot;</span>)</span>
+<span id="cb14-13"><a href="modeling.html#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="modeling.html#cb14-14" aria-hidden="true" tabindex="-1"></a>tfidf_rec <span class="ot">&lt;-</span></span>
+<span id="cb14-15"><a href="modeling.html#cb14-15" aria-hidden="true" tabindex="-1"></a>  recipes<span class="sc">::</span><span class="fu">recipe</span>(product_category <span class="sc">~</span> ., <span class="at">data =</span> corp_train) <span class="sc">|&gt;</span></span>
+<span id="cb14-16"><a href="modeling.html#cb14-16" aria-hidden="true" tabindex="-1"></a>  recipes<span class="sc">::</span><span class="fu">step_YeoJohnson</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb14-17"><a href="modeling.html#cb14-17" aria-hidden="true" tabindex="-1"></a>  themis<span class="sc">::</span><span class="fu">step_downsample</span>(product_category, <span class="at">under_ratio =</span> <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-18"><a href="modeling.html#cb14-18" aria-hidden="true" tabindex="-1"></a>  textrecipes<span class="sc">::</span><span class="fu">step_tokenize</span>(text, <span class="at">custom_token =</span> \(x) { <span class="fu">strsplit</span>(x, <span class="st">&quot; &quot;</span>, <span class="at">fixed =</span> <span class="cn">TRUE</span>) }) <span class="sc">|&gt;</span></span>
+<span id="cb14-19"><a href="modeling.html#cb14-19" aria-hidden="true" tabindex="-1"></a>  textrecipes<span class="sc">::</span><span class="fu">step_tokenfilter</span>(text, <span class="at">min_times =</span> <span class="dv">100</span>, <span class="at">max_times =</span> <span class="fl">1e4</span>, <span class="at">max_tokens =</span> <span class="dv">300</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-20"><a href="modeling.html#cb14-20" aria-hidden="true" tabindex="-1"></a>  textrecipes<span class="sc">::</span><span class="fu">step_tfidf</span>(text, <span class="at">sublinear_tf =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-21"><a href="modeling.html#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="modeling.html#cb14-22" aria-hidden="true" tabindex="-1"></a>corp_wflow <span class="ot">&lt;-</span></span>
+<span id="cb14-23"><a href="modeling.html#cb14-23" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">workflow</span>() <span class="sc">|&gt;</span></span>
+<span id="cb14-24"><a href="modeling.html#cb14-24" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_model</span>(ranger_spec) <span class="sc">|&gt;</span></span>
+<span id="cb14-25"><a href="modeling.html#cb14-25" aria-hidden="true" tabindex="-1"></a>  workflows<span class="sc">::</span><span class="fu">add_recipe</span>(tfidf_rec)</span></code></pre></div>
 </div>
 <div id="ハイパーパラメータの探索" class="section level2 hasAnchor" number="4.2">
 <h2><span class="header-section-number">4.2</span> ハイパーパラメータの探索<a href="modeling.html#ハイパーパラメータの探索" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><code>trees</code>と<code>mtry</code>について、3分割CVで探索します。</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="modeling.html#cb16-1" aria-hidden="true" tabindex="-1"></a>ranger_tfidf_grid <span class="ot">&lt;-</span></span>
-<span id="cb16-2"><a href="modeling.html#cb16-2" aria-hidden="true" tabindex="-1"></a>  corp_wflow <span class="sc">|&gt;</span></span>
-<span id="cb16-3"><a href="modeling.html#cb16-3" aria-hidden="true" tabindex="-1"></a>  tune<span class="sc">::</span><span class="fu">tune_grid</span>(</span>
-<span id="cb16-4"><a href="modeling.html#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">resamples =</span> rsample<span class="sc">::</span><span class="fu">vfold_cv</span>(corp_train, <span class="at">strata =</span> product_category, <span class="at">v =</span> 3L),</span>
-<span id="cb16-5"><a href="modeling.html#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid =</span> dials<span class="sc">::</span><span class="fu">grid_latin_hypercube</span>(</span>
-<span id="cb16-6"><a href="modeling.html#cb16-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(</span>
-<span id="cb16-7"><a href="modeling.html#cb16-7" aria-hidden="true" tabindex="-1"></a>        dials<span class="sc">::</span><span class="fu">trees</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">400</span>)),</span>
-<span id="cb16-8"><a href="modeling.html#cb16-8" aria-hidden="true" tabindex="-1"></a>        dials<span class="sc">::</span><span class="fu">finalize</span>(</span>
-<span id="cb16-9"><a href="modeling.html#cb16-9" aria-hidden="true" tabindex="-1"></a>          dials<span class="sc">::</span><span class="fu">mtry</span>(),</span>
-<span id="cb16-10"><a href="modeling.html#cb16-10" aria-hidden="true" tabindex="-1"></a>          tfidf_rec <span class="sc">|&gt;</span> <span class="fu">prep</span>() <span class="sc">|&gt;</span> <span class="fu">bake</span>(<span class="at">new_data =</span> <span class="cn">NULL</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">!</span>product_category)</span>
-<span id="cb16-11"><a href="modeling.html#cb16-11" aria-hidden="true" tabindex="-1"></a>        )) <span class="sc">|&gt;</span></span>
-<span id="cb16-12"><a href="modeling.html#cb16-12" aria-hidden="true" tabindex="-1"></a>        dials<span class="sc">::</span><span class="fu">parameters</span>(),</span>
-<span id="cb16-13"><a href="modeling.html#cb16-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> 5L</span>
-<span id="cb16-14"><a href="modeling.html#cb16-14" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb16-15"><a href="modeling.html#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">metrics =</span> yardstick<span class="sc">::</span><span class="fu">metric_set</span>(yardstick<span class="sc">::</span>f_meas),</span>
-<span id="cb16-16"><a href="modeling.html#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> tune<span class="sc">::</span><span class="fu">control_grid</span>(<span class="at">save_pred =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb16-17"><a href="modeling.html#cb16-17" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="modeling.html#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(ranger_tfidf_grid)</span></code></pre></div>
+<p><code>mtry</code>について、3分割CVで探索します。</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="modeling.html#cb15-1" aria-hidden="true" tabindex="-1"></a>ranger_tfidf_grid <span class="ot">&lt;-</span></span>
+<span id="cb15-2"><a href="modeling.html#cb15-2" aria-hidden="true" tabindex="-1"></a>  corp_wflow <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="modeling.html#cb15-3" aria-hidden="true" tabindex="-1"></a>  tune<span class="sc">::</span><span class="fu">tune_grid</span>(</span>
+<span id="cb15-4"><a href="modeling.html#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">resamples =</span> rsample<span class="sc">::</span><span class="fu">vfold_cv</span>(corp_train, <span class="at">strata =</span> product_category, <span class="at">v =</span> 3L),</span>
+<span id="cb15-5"><a href="modeling.html#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid =</span> dials<span class="sc">::</span><span class="fu">grid_latin_hypercube</span>(</span>
+<span id="cb15-6"><a href="modeling.html#cb15-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(</span>
+<span id="cb15-7"><a href="modeling.html#cb15-7" aria-hidden="true" tabindex="-1"></a>        dials<span class="sc">::</span><span class="fu">finalize</span>(</span>
+<span id="cb15-8"><a href="modeling.html#cb15-8" aria-hidden="true" tabindex="-1"></a>          dials<span class="sc">::</span><span class="fu">mtry</span>(),</span>
+<span id="cb15-9"><a href="modeling.html#cb15-9" aria-hidden="true" tabindex="-1"></a>          tfidf_rec <span class="sc">|&gt;</span> <span class="fu">prep</span>() <span class="sc">|&gt;</span> <span class="fu">bake</span>(<span class="at">new_data =</span> <span class="cn">NULL</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">!</span>product_category)</span>
+<span id="cb15-10"><a href="modeling.html#cb15-10" aria-hidden="true" tabindex="-1"></a>        )) <span class="sc">|&gt;</span></span>
+<span id="cb15-11"><a href="modeling.html#cb15-11" aria-hidden="true" tabindex="-1"></a>        dials<span class="sc">::</span><span class="fu">parameters</span>(),</span>
+<span id="cb15-12"><a href="modeling.html#cb15-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> 5L</span>
+<span id="cb15-13"><a href="modeling.html#cb15-13" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb15-14"><a href="modeling.html#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">metrics =</span> yardstick<span class="sc">::</span><span class="fu">metric_set</span>(yardstick<span class="sc">::</span>f_meas),</span>
+<span id="cb15-15"><a href="modeling.html#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> tune<span class="sc">::</span><span class="fu">control_grid</span>(<span class="at">save_pred =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-16"><a href="modeling.html#cb15-16" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="modeling.html#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(ranger_tfidf_grid)</span></code></pre></div>
 <p><img src="_main_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 </div>
 <div id="モデルの評価" class="section level2 hasAnchor" number="4.3">
 <h2><span class="header-section-number">4.3</span> モデルの評価<a href="modeling.html#モデルの評価" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><code>last_fit</code>して、F値を確認します。</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="modeling.html#cb18-1" aria-hidden="true" tabindex="-1"></a>corp_wflow_best <span class="ot">&lt;-</span></span>
-<span id="cb18-2"><a href="modeling.html#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">finalize_workflow</span>(corp_wflow, <span class="fu">select_best</span>(ranger_tfidf_grid))</span>
-<span id="cb18-3"><a href="modeling.html#cb18-3" aria-hidden="true" tabindex="-1"></a>corp_last_fit <span class="ot">&lt;-</span></span>
-<span id="cb18-4"><a href="modeling.html#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">last_fit</span>(corp_wflow_best, corp_split, <span class="at">metrics =</span> <span class="fu">metric_set</span>(f_meas))</span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="modeling.html#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(corp_last_fit)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="modeling.html#cb17-1" aria-hidden="true" tabindex="-1"></a>corp_wflow_best <span class="ot">&lt;-</span></span>
+<span id="cb17-2"><a href="modeling.html#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">finalize_workflow</span>(corp_wflow, <span class="fu">select_best</span>(ranger_tfidf_grid))</span>
+<span id="cb17-3"><a href="modeling.html#cb17-3" aria-hidden="true" tabindex="-1"></a>corp_last_fit <span class="ot">&lt;-</span></span>
+<span id="cb17-4"><a href="modeling.html#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">last_fit</span>(corp_wflow_best, corp_split, <span class="at">metrics =</span> <span class="fu">metric_set</span>(f_meas))</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="modeling.html#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(corp_last_fit)</span></code></pre></div>
 <pre><code>## # A tibble: 1 × 4
 ##   .metric .estimator .estimate .config             
 ##   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
-## 1 f_meas  macro          0.884 Preprocessor1_Model1</code></pre>
+## 1 f_meas  macro          0.875 Preprocessor1_Model1</code></pre>
 <p>混同行列を見ると、OtherをVideo DVDと誤分類している例がやや多いように見えます。</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="modeling.html#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_predictions</span>(corp_last_fit) <span class="sc">|&gt;</span></span>
-<span id="cb21-2"><a href="modeling.html#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">conf_mat</span>(product_category, .pred_class) <span class="sc">|&gt;</span></span>
-<span id="cb21-3"><a href="modeling.html#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>(<span class="at">type =</span> <span class="st">&quot;heatmap&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="modeling.html#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_predictions</span>(corp_last_fit) <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="modeling.html#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">conf_mat</span>(product_category, .pred_class) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a href="modeling.html#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>(<span class="at">type =</span> <span class="st">&quot;heatmap&quot;</span>)</span></code></pre></div>
 <div class="figure"><span style="display:block;" id="fig:unnamed-chunk-17"></span>
 <img src="_main_files/figure-html/unnamed-chunk-17-1.png" alt="Confustion matrix of fitted model." width="672" />
 <p class="caption">
@@ -295,14 +299,14 @@ Figure 4.1: Confusion matrix
 </p>
 </div>
 <p>変数重要度がとくに大きい特徴量を見てみると、Video DVDやMusicと同定するのに効いていそうな語彙が並んでいることがわかります。</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="modeling.html#cb22-1" aria-hidden="true" tabindex="-1"></a>corp_last_fit <span class="sc">|&gt;</span></span>
-<span id="cb22-2"><a href="modeling.html#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_fit_parsnip</span>() <span class="sc">|&gt;</span></span>
-<span id="cb22-3"><a href="modeling.html#cb22-3" aria-hidden="true" tabindex="-1"></a>  (\(x){ x<span class="sc">$</span>fit<span class="sc">$</span>variable.importance })() <span class="sc">|&gt;</span></span>
-<span id="cb22-4"><a href="modeling.html#cb22-4" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">enframe</span>() <span class="sc">|&gt;</span></span>
-<span id="cb22-5"><a href="modeling.html#cb22-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_max</span>(value, <span class="at">n =</span> <span class="dv">25</span>) <span class="sc">|&gt;</span></span>
-<span id="cb22-6"><a href="modeling.html#cb22-6" aria-hidden="true" tabindex="-1"></a>  ggpubr<span class="sc">::</span><span class="fu">ggdotchart</span>(<span class="at">x =</span> <span class="st">&quot;name&quot;</span>, <span class="at">y =</span> <span class="st">&quot;value&quot;</span>,</span>
-<span id="cb22-7"><a href="modeling.html#cb22-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">rotate =</span> <span class="cn">TRUE</span>, <span class="at">sorting =</span> <span class="st">&quot;descending&quot;</span>, <span class="at">add =</span> <span class="st">&quot;segment&quot;</span>,</span>
-<span id="cb22-8"><a href="modeling.html#cb22-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">xlab =</span> <span class="st">&quot;feature&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;importance&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="modeling.html#cb21-1" aria-hidden="true" tabindex="-1"></a>corp_last_fit <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="modeling.html#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">extract_fit_parsnip</span>() <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a href="modeling.html#cb21-3" aria-hidden="true" tabindex="-1"></a>  (\(x){ x<span class="sc">$</span>fit<span class="sc">$</span>variable.importance })() <span class="sc">|&gt;</span></span>
+<span id="cb21-4"><a href="modeling.html#cb21-4" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">enframe</span>() <span class="sc">|&gt;</span></span>
+<span id="cb21-5"><a href="modeling.html#cb21-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_max</span>(value, <span class="at">n =</span> <span class="dv">25</span>) <span class="sc">|&gt;</span></span>
+<span id="cb21-6"><a href="modeling.html#cb21-6" aria-hidden="true" tabindex="-1"></a>  ggpubr<span class="sc">::</span><span class="fu">ggdotchart</span>(<span class="at">x =</span> <span class="st">&quot;name&quot;</span>, <span class="at">y =</span> <span class="st">&quot;value&quot;</span>,</span>
+<span id="cb21-7"><a href="modeling.html#cb21-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">rotate =</span> <span class="cn">TRUE</span>, <span class="at">sorting =</span> <span class="st">&quot;descending&quot;</span>, <span class="at">add =</span> <span class="st">&quot;segment&quot;</span>,</span>
+<span id="cb21-8"><a href="modeling.html#cb21-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">xlab =</span> <span class="st">&quot;feature&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;importance&quot;</span>)</span></code></pre></div>
 <div class="figure"><span style="display:block;" id="fig:unnamed-chunk-18"></span>
 <img src="_main_files/figure-html/unnamed-chunk-18-1.png" alt="Variable importance plot." width="672" />
 <p class="caption">
@@ -311,25 +315,25 @@ Figure 4.2: Variable importance
 </div>
 <p>OtherでVideo DVDと誤分類されている商品レビューは、どのようなレビューなのでしょうか。</p>
 <p>サンプリングする前の元のデータセットから先頭2000行を取ってきて、学習したモデルでカテゴリを予測させてみて、同様に誤分類されたケースを確認してみます。</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="modeling.html#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(<span class="fu">extract_fit_parsnip</span>(corp_last_fit),</span>
-<span id="cb23-2"><a href="modeling.html#cb23-2" aria-hidden="true" tabindex="-1"></a>        <span class="fu">extract_preprocessor</span>(corp_last_fit) <span class="sc">|&gt;</span></span>
-<span id="cb23-3"><a href="modeling.html#cb23-3" aria-hidden="true" tabindex="-1"></a>          <span class="fu">prep</span>() <span class="sc">|&gt;</span></span>
-<span id="cb23-4"><a href="modeling.html#cb23-4" aria-hidden="true" tabindex="-1"></a>          <span class="fu">bake</span>(<span class="at">new_data =</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(corp, <span class="at">n =</span> <span class="dv">2000</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">!</span>doc_id))) <span class="sc">|&gt;</span></span>
-<span id="cb23-5"><a href="modeling.html#cb23-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">bind_cols</span>(</span>
-<span id="cb23-6"><a href="modeling.html#cb23-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_head</span>(corp, <span class="at">n =</span> <span class="dv">2000</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(doc_id, product_category, text)) <span class="sc">|&gt;</span></span>
-<span id="cb23-7"><a href="modeling.html#cb23-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(product_category <span class="sc">==</span> <span class="st">&quot;Other&quot;</span> <span class="sc">&amp;</span> .pred_class <span class="sc">==</span> <span class="st">&quot;Video DVD&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb23-8"><a href="modeling.html#cb23-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
-<span id="cb23-9"><a href="modeling.html#cb23-9" aria-hidden="true" tabindex="-1"></a>    dtplyr<span class="sc">::</span><span class="fu">lazy_dt</span>(dt) <span class="sc">|&gt;</span></span>
-<span id="cb23-10"><a href="modeling.html#cb23-10" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(review_id, product_category) <span class="sc">|&gt;</span></span>
-<span id="cb23-11"><a href="modeling.html#cb23-11" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">truth_category =</span> product_category) <span class="sc">|&gt;</span></span>
-<span id="cb23-12"><a href="modeling.html#cb23-12" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">as_tibble</span>(),</span>
-<span id="cb23-13"><a href="modeling.html#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;doc_id&quot;</span> <span class="ot">=</span> <span class="st">&quot;review_id&quot;</span>)</span>
-<span id="cb23-14"><a href="modeling.html#cb23-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb23-15"><a href="modeling.html#cb23-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">text =</span> stringr<span class="sc">::</span><span class="fu">str_sub</span>(text, <span class="at">end =</span> <span class="dv">30</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb23-16"><a href="modeling.html#cb23-16" aria-hidden="true" tabindex="-1"></a>  reactable<span class="sc">::</span><span class="fu">reactable</span>(<span class="at">filterable =</span> <span class="cn">TRUE</span>, <span class="at">compact =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<div class="reactable html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-a99866e1592236113654" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-a99866e1592236113654">{"x":{"tag":{"name":"Reactable","attribs":{"data":{".pred_class":["Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD"],"doc_id":["R3JS2RT8ERYKNC","R2EHARZ0UDYZIF","R26T7QUZY24J3Z","R3HPBVBXK5ANL5","R29KFFWMBXNR13","RROOOTXRCRVWJ","R2WSB1T3HA9YND","RUNMKETXC5PUK","R3L98P0I4ZUN2L","R28PQYJPVKJOM7","RVH3T4KU3NE0T","R2FS0XC35ON13M","R3H08VZ63U7ZS4","R20TKDQYYRLJ3E","R1MX3LLQ1PI3VH","R14K5BA9OWGZWO","R1MY4GCUUML7AV","R16Z8DFMQBOUCZ","RFLV5E1HQIJJA","R39OLBJ7328IEG","R1BLVV56FLNFCS","RDTOV09OSLXYQ","R20W5XPJ8AVLR","R57XDO29QQ6WP","R3EYEWDLVFDK3A","R2NJ6NK2T3G188"],"product_category":["Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other"],"text":["新しい 恋愛 パターン ? 仕事 生きがい 男性 全く 別 ","怪獣 王子 愉楽 0 DiMAX 0 回 観る 今回 購入 ","平坦 印象 オープニング クレジット アンダー ワールド ビ","本 魅力 取りつかれる 一 冊 今 0 年 前 クリス ティ","デンゼルワシントン 観る れる 勧善懲悪 デンゼルワシントン","おすすめ ! 私 エド さん 絵 可愛い 大好き 本 とても","戦争 文学 良 著 同名 TV ドラマ 非常 良い 出来 こ","クソ たけ マザボクソ たける 金 余る 買う クソ たけ ","家族 安心 する 楽しめる はらはら ドキドキ ストリー ロ","海外 ゲーム イベント 視聴 欠かす 出来る アプリ 使用 ","初心者 読む 映画 話題 なる 映画 見る 人 情景 浮かぶ","GOOD ! ビデオカメラ 映像 0 枚 ディスク 焼く 配","明晰 饒舌 ドラマツルギー 進化 ガルシア マルケス 全 小","買う 二 箱 目 購入 とにかく お買い得 コスパ 見る レ","オススメ ! マイケル 初心者 私 0 , 0 円 ちょっと","極上 名画 代名詞 もし 誰 面白い 映画 教える 何 脈絡","! 字幕 吹き替え 見る ない 英語 てんで わかる イラス","クレア ブラピ ボンジョヴィ 乾杯 絶対 現実 有り得る 素","楽しい ♪ 0 歳 娘 プレゼント する とても 喜ぶ アイ","面白い アメリカ コメディ 映画 十分 面白い それ エンデ","独特 雰囲気 ある ゲーム 事前 動画 確認 すすめる PS","人間 妖精 さん 間 交わす れる 愛憎 描く お話 デキ ","暇つぶし 映画 何 考える 見る られる 映画 小 難しい ","騙す れる 客寄せ 用 Android 端末 すぐ ご 利用","原作 抜け出る ちょっと 古い 映画 現在 観る とても 新","とっても 怖い ファー ブル 昆虫 記 ? 最新 技術 0 "],"truth_category":["Video","Digital_Video_Download","Video","Books","Digital_Video_Download","Books","Books","PC","Video","Mobile_Apps","Books","PC","Books","Toys","Video","Video","Books","Digital_Video_Download","Toys","Digital_Video_Download","Video Games","Digital_Video_Download","Digital_Video_Download","Mobile_Apps","Video","Books"]},"columns":[{"id":".pred_class","name":".pred_class","type":"factor"},{"id":"doc_id","name":"doc_id","type":"character"},{"id":"product_category","name":"product_category","type":"factor"},{"id":"text","name":"text","type":"character"},{"id":"truth_category","name":"truth_category","type":"character"}],"filterable":true,"compact":true,"dataKey":"c7bc3c7ae7e63543050596163ac759ee"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
-<p>BooksやVideoというカテゴリの商品が多いようです。</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="modeling.html#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(<span class="fu">extract_fit_parsnip</span>(corp_last_fit),</span>
+<span id="cb22-2"><a href="modeling.html#cb22-2" aria-hidden="true" tabindex="-1"></a>        <span class="fu">extract_preprocessor</span>(corp_last_fit) <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a href="modeling.html#cb22-3" aria-hidden="true" tabindex="-1"></a>          <span class="fu">prep</span>() <span class="sc">|&gt;</span></span>
+<span id="cb22-4"><a href="modeling.html#cb22-4" aria-hidden="true" tabindex="-1"></a>          <span class="fu">bake</span>(<span class="at">new_data =</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(corp, <span class="at">n =</span> <span class="dv">2000</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">!</span>doc_id))) <span class="sc">|&gt;</span></span>
+<span id="cb22-5"><a href="modeling.html#cb22-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">bind_cols</span>(</span>
+<span id="cb22-6"><a href="modeling.html#cb22-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_head</span>(corp, <span class="at">n =</span> <span class="dv">2000</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(doc_id, product_category, text)) <span class="sc">|&gt;</span></span>
+<span id="cb22-7"><a href="modeling.html#cb22-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(product_category <span class="sc">==</span> <span class="st">&quot;Other&quot;</span> <span class="sc">&amp;</span> .pred_class <span class="sc">==</span> <span class="st">&quot;Video DVD&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb22-8"><a href="modeling.html#cb22-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb22-9"><a href="modeling.html#cb22-9" aria-hidden="true" tabindex="-1"></a>    dtplyr<span class="sc">::</span><span class="fu">lazy_dt</span>(dt) <span class="sc">|&gt;</span></span>
+<span id="cb22-10"><a href="modeling.html#cb22-10" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(review_id, product_category) <span class="sc">|&gt;</span></span>
+<span id="cb22-11"><a href="modeling.html#cb22-11" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">truth_category =</span> product_category) <span class="sc">|&gt;</span></span>
+<span id="cb22-12"><a href="modeling.html#cb22-12" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">as_tibble</span>(),</span>
+<span id="cb22-13"><a href="modeling.html#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;doc_id&quot;</span> <span class="ot">=</span> <span class="st">&quot;review_id&quot;</span>)</span>
+<span id="cb22-14"><a href="modeling.html#cb22-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb22-15"><a href="modeling.html#cb22-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">text =</span> stringr<span class="sc">::</span><span class="fu">str_sub</span>(text, <span class="at">end =</span> <span class="dv">30</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb22-16"><a href="modeling.html#cb22-16" aria-hidden="true" tabindex="-1"></a>  reactable<span class="sc">::</span><span class="fu">reactable</span>(<span class="at">filterable =</span> <span class="cn">TRUE</span>, <span class="at">compact =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="reactable html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-987065653917661b598f" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-987065653917661b598f">{"x":{"tag":{"name":"Reactable","attribs":{"data":{".pred_class":["Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD","Video DVD"],"doc_id":["R3A3MXNH162GNN","R5PHDUGQ7EJGO","R2BHFIYBVJKJQX","RJ7HQ2VMP62AZ","R3BI0BRGPK2U0U","R38XLECU2OXIJ6","R13NNXKZPK2GNB","R9QV5NZI529QX","R2VO7BABBO3AP9","R1EO8C2V0VGLO","RCTPJ5D8A88S0","R3GI9XMT5BG4HH","RAXX48Y9UNOLQ","R2W4R4L06U3CTZ","RF02RXZWQ0UN0","R13UPEMRXYKLBD"],"product_category":["Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other","Other"],"text":["ナチュラル スピード 良い 早口 すごい 良い 英会話 レベ","映画 再現 たくさん 遊び 詰まる セット こちら スターウ","夢 信じる 素晴らしい さ 感謝 祭 ニューヨーク 街 老舗","何 度 見る ずっと 昔 映画 館 観る 以来 ビデオ 数え","最高 ストライク ライフル 持つ 改良 する 助かる ウイン","\" 空中 戦 \" 観る ある ! 米 海軍 空母 飛び立つ ","エイリアン 代名詞 映画 世界 宇宙 人 想像 図 なる <","あら ら ハリウッド 映画 ジーン・セバーグ いう ゴダール","Give me some of your tots ! Na","親 一緒 テンション 上がる とても かわいい セット 保育","ハマる 面白い ちょっと 難易 度 高め ローグライク アク","フランス語 勉強 最適 \\\\\" Les hommes n '","やっぱり 本 最高 ! 私 映画 影響 する れる これ 買","駄作 馬鹿 作品 ある 自分 一番 不快 映画 ジョーカー ","ものすごい 安易 アクション シーン 派手 それなり 工夫 ","貧しい 青年 体 女性 利用 する 成り上がる 物語 著者 "],"truth_category":["Books","Toys","Video","Video","Toys","Video","Video","Digital_Video_Download","Video","Toys","Mobile_Apps","Books","Books","Digital_Video_Download","Video","Digital_Ebook_Purchase"]},"columns":[{"id":".pred_class","name":".pred_class","type":"factor"},{"id":"doc_id","name":"doc_id","type":"character"},{"id":"product_category","name":"product_category","type":"factor"},{"id":"text","name":"text","type":"character"},{"id":"truth_category","name":"truth_category","type":"character"}],"filterable":true,"compact":true,"dataKey":"5cb597e2f2397a4139f030c2e8a5e9fb"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+<p>BooksやVideo、Digital_Video_Downloadといったカテゴリの商品が多いようです。</p>
 
 </div>
 </div>
@@ -339,7 +343,7 @@ Figure 4.2: Variable importance
         </div>
       </div>
 <a href="preprocess.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="session.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="dmr.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

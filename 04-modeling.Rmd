@@ -20,7 +20,8 @@ corp_test <- testing(corp_split)
 ranger_spec <-
   parsnip::rand_forest(
     mtry = tune::tune(),
-    trees = tune::tune()
+    trees = 300L,
+    min_n = 5L
   ) |>
   parsnip::set_engine(
     "ranger",
@@ -45,7 +46,7 @@ corp_wflow <-
 
 ## ハイパーパラメータの探索
 
-`trees`と`mtry`について、3分割CVで探索します。
+`mtry`について、3分割CVで探索します。
 
 ```{r}
 ranger_tfidf_grid <-
@@ -54,7 +55,6 @@ ranger_tfidf_grid <-
     resamples = rsample::vfold_cv(corp_train, strata = product_category, v = 3L),
     grid = dials::grid_latin_hypercube(
       list(
-        dials::trees(range = c(100, 400)),
         dials::finalize(
           dials::mtry(),
           tfidf_rec |> prep() |> bake(new_data = NULL) |> dplyr::select(!product_category)
@@ -134,4 +134,4 @@ predict(extract_fit_parsnip(corp_last_fit),
   reactable::reactable(filterable = TRUE, compact = TRUE)
 ```
 
-BooksやVideoというカテゴリの商品が多いようです。
+BooksやVideo、Digital_Video_Downloadといったカテゴリの商品が多いようです。

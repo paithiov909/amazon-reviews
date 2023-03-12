@@ -23,7 +23,7 @@
 <meta name="author" content="Akiru Kato" />
 
 
-<meta name="date" content="2023-03-11" />
+<meta name="date" content="2023-03-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -174,7 +174,7 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#その他の引数"><i class="fa fa-check"></i><b>1.3</b> その他の引数</a>
 <ul>
-<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#imporatnce"><i class="fa fa-check"></i><b>1.3.1</b> imporatnce</a></li>
+<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#importance"><i class="fa fa-check"></i><b>1.3.1</b> importance</a></li>
 <li class="chapter" data-level="1.3.2" data-path="intro.html"><a href="intro.html#num.threads"><i class="fa fa-check"></i><b>1.3.2</b> num.threads</a></li>
 </ul></li>
 </ul></li>
@@ -194,7 +194,11 @@ div.csl-indent {
 <li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#ハイパーパラメータの探索"><i class="fa fa-check"></i><b>4.2</b> ハイパーパラメータの探索</a></li>
 <li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#モデルの評価"><i class="fa fa-check"></i><b>4.3</b> モデルの評価</a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i><b>5</b> Sessioninfo</a></li>
+<li class="chapter" data-level="5" data-path="dmr.html"><a href="dmr.html"><i class="fa fa-check"></i><b>5</b> DMR</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="dmr.html"><a href="dmr.html#dmrdistributed-multinomial-regression"><i class="fa fa-check"></i><b>5.1</b> DMR（distributed multinomial regression）</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i>Sessioninfo</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 </ul>
 
@@ -219,96 +223,96 @@ div.csl-indent {
 <h2><span class="header-section-number">3.1</span> 前処理<a href="preprocess.html#前処理" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>データセットから10%だけ抽出して使用することにします。ここで一部の前処理もやってしまいます。</p>
 <p>レビューのテキストについては、あらかじめ形態素解析をすませてから、スペース区切りのテキストとしてデータセットのなかに差し戻しておきます。tidymodelsの枠組みのなかでやってもよいのですが、形態素解析は文字列を分割する処理としてはわりと重いので、個人的には、学習とセットではやらないほうがよいかなと思います。</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="preprocess.html#cb9-1" aria-hidden="true" tabindex="-1"></a>corp <span class="ot">&lt;-</span> dt <span class="sc">|&gt;</span></span>
-<span id="cb9-2"><a href="preprocess.html#cb9-2" aria-hidden="true" tabindex="-1"></a>  dtplyr<span class="sc">::</span><span class="fu">lazy_dt</span>(<span class="at">immutable =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb9-3"><a href="preprocess.html#cb9-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">prop =</span> .<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
-<span id="cb9-4"><a href="preprocess.html#cb9-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
-<span id="cb9-5"><a href="preprocess.html#cb9-5" aria-hidden="true" tabindex="-1"></a>    review_id, product_category,</span>
-<span id="cb9-6"><a href="preprocess.html#cb9-6" aria-hidden="true" tabindex="-1"></a>    verified_purchase,</span>
-<span id="cb9-7"><a href="preprocess.html#cb9-7" aria-hidden="true" tabindex="-1"></a>    star_rating, helpful_votes, total_votes,</span>
-<span id="cb9-8"><a href="preprocess.html#cb9-8" aria-hidden="true" tabindex="-1"></a>    review_headline, review_body,</span>
-<span id="cb9-9"><a href="preprocess.html#cb9-9" aria-hidden="true" tabindex="-1"></a>    review_date</span>
-<span id="cb9-10"><a href="preprocess.html#cb9-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb9-11"><a href="preprocess.html#cb9-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb9-12"><a href="preprocess.html#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">product_category =</span> forcats<span class="sc">::</span><span class="fu">fct_lump</span>(<span class="fu">factor</span>(product_category), <span class="at">n =</span> <span class="dv">2</span>),</span>
-<span id="cb9-13"><a href="preprocess.html#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">verified_purchase =</span> <span class="fu">factor</span>(verified_purchase),</span>
-<span id="cb9-14"><a href="preprocess.html#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">star_rating =</span> forcats<span class="sc">::</span><span class="fu">fct_lump</span>(<span class="fu">factor</span>(star_rating), <span class="at">n =</span> <span class="dv">2</span>),</span>
-<span id="cb9-15"><a href="preprocess.html#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_len =</span> <span class="fu">nchar</span>(review_body),</span>
-<span id="cb9-16"><a href="preprocess.html#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_month =</span> <span class="fu">factor</span>(lubridate<span class="sc">::</span><span class="fu">month</span>(review_date)),</span>
-<span id="cb9-17"><a href="preprocess.html#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_wday =</span> <span class="fu">factor</span>(lubridate<span class="sc">::</span><span class="fu">wday</span>(review_date, <span class="at">label =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb9-18"><a href="preprocess.html#cb9-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb9-19"><a href="preprocess.html#cb9-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">!</span>review_date) <span class="sc">|&gt;</span></span>
-<span id="cb9-20"><a href="preprocess.html#cb9-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(review_len <span class="sc">&gt;</span> <span class="dv">50</span>, review_len <span class="sc">&lt;</span> <span class="dv">2000</span>) <span class="sc">|&gt;</span></span>
-<span id="cb9-21"><a href="preprocess.html#cb9-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="preprocess.html#cb8-1" aria-hidden="true" tabindex="-1"></a>corp <span class="ot">&lt;-</span> dt <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="preprocess.html#cb8-2" aria-hidden="true" tabindex="-1"></a>  dtplyr<span class="sc">::</span><span class="fu">lazy_dt</span>(<span class="at">immutable =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="preprocess.html#cb8-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">prop =</span> .<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="preprocess.html#cb8-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb8-5"><a href="preprocess.html#cb8-5" aria-hidden="true" tabindex="-1"></a>    review_id, product_category,</span>
+<span id="cb8-6"><a href="preprocess.html#cb8-6" aria-hidden="true" tabindex="-1"></a>    verified_purchase,</span>
+<span id="cb8-7"><a href="preprocess.html#cb8-7" aria-hidden="true" tabindex="-1"></a>    star_rating, helpful_votes, total_votes,</span>
+<span id="cb8-8"><a href="preprocess.html#cb8-8" aria-hidden="true" tabindex="-1"></a>    review_headline, review_body,</span>
+<span id="cb8-9"><a href="preprocess.html#cb8-9" aria-hidden="true" tabindex="-1"></a>    review_date</span>
+<span id="cb8-10"><a href="preprocess.html#cb8-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-11"><a href="preprocess.html#cb8-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb8-12"><a href="preprocess.html#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">product_category =</span> forcats<span class="sc">::</span><span class="fu">fct_lump</span>(<span class="fu">factor</span>(product_category), <span class="at">n =</span> <span class="dv">2</span>),</span>
+<span id="cb8-13"><a href="preprocess.html#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">verified_purchase =</span> <span class="fu">factor</span>(verified_purchase),</span>
+<span id="cb8-14"><a href="preprocess.html#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">star_rating =</span> forcats<span class="sc">::</span><span class="fu">fct_lump</span>(<span class="fu">factor</span>(star_rating), <span class="at">n =</span> <span class="dv">2</span>),</span>
+<span id="cb8-15"><a href="preprocess.html#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_len =</span> <span class="fu">nchar</span>(review_body),</span>
+<span id="cb8-16"><a href="preprocess.html#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_month =</span> <span class="fu">factor</span>(lubridate<span class="sc">::</span><span class="fu">month</span>(review_date)),</span>
+<span id="cb8-17"><a href="preprocess.html#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">review_wday =</span> <span class="fu">factor</span>(lubridate<span class="sc">::</span><span class="fu">wday</span>(review_date, <span class="at">label =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb8-18"><a href="preprocess.html#cb8-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-19"><a href="preprocess.html#cb8-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">!</span>review_date) <span class="sc">|&gt;</span></span>
+<span id="cb8-20"><a href="preprocess.html#cb8-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(review_len <span class="sc">&gt;</span> <span class="dv">50</span>, review_len <span class="sc">&lt;</span> <span class="dv">2000</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-21"><a href="preprocess.html#cb8-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code></pre></div>
 <p>ここではMeCab+IPA辞書で解析し、品詞が「助詞・助動詞・記号」である語と、品詞細分類1が「非自立」である語を取り除きます。</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="preprocess.html#cb10-1" aria-hidden="true" tabindex="-1"></a>corp <span class="ot">&lt;-</span> corp <span class="sc">|&gt;</span></span>
-<span id="cb10-2"><a href="preprocess.html#cb10-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(review_id, review_headline, review_body) <span class="sc">|&gt;</span></span>
-<span id="cb10-3"><a href="preprocess.html#cb10-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">chunk_id =</span> dplyr<span class="sc">::</span><span class="fu">ntile</span>(dplyr<span class="sc">::</span><span class="fu">row_number</span>(), <span class="dv">10</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb10-4"><a href="preprocess.html#cb10-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(chunk_id) <span class="sc">|&gt;</span></span>
-<span id="cb10-5"><a href="preprocess.html#cb10-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_map</span>(\(df, grp) {</span>
-<span id="cb10-6"><a href="preprocess.html#cb10-6" aria-hidden="true" tabindex="-1"></a>    df <span class="sc">|&gt;</span></span>
-<span id="cb10-7"><a href="preprocess.html#cb10-7" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb10-8"><a href="preprocess.html#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">review_body =</span> stringi<span class="sc">::</span><span class="fu">stri_c</span>(review_headline, review_body, <span class="at">sep =</span> <span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb10-9"><a href="preprocess.html#cb10-9" aria-hidden="true" tabindex="-1"></a>          stringi<span class="sc">::</span><span class="fu">stri_replace_all_regex</span>(<span class="st">&quot;(&lt;br /&gt;)&quot;</span>, <span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb10-10"><a href="preprocess.html#cb10-10" aria-hidden="true" tabindex="-1"></a>          audubon<span class="sc">::</span><span class="fu">strj_normalize</span>() <span class="sc">|&gt;</span></span>
-<span id="cb10-11"><a href="preprocess.html#cb10-11" aria-hidden="true" tabindex="-1"></a>          stringi<span class="sc">::</span><span class="fu">stri_trim_both</span>() <span class="sc">|&gt;</span></span>
-<span id="cb10-12"><a href="preprocess.html#cb10-12" aria-hidden="true" tabindex="-1"></a>          stringi<span class="sc">::</span><span class="fu">stri_replace_all_regex</span>(<span class="st">&quot;[</span><span class="sc">\\</span><span class="st">d]+&quot;</span>, <span class="st">&quot;0&quot;</span>)</span>
-<span id="cb10-13"><a href="preprocess.html#cb10-13" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span></span>
-<span id="cb10-14"><a href="preprocess.html#cb10-14" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(review_id, review_body) <span class="sc">|&gt;</span></span>
-<span id="cb10-15"><a href="preprocess.html#cb10-15" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">tokenize</span>(review_body, review_id) <span class="sc">|&gt;</span></span>
-<span id="cb10-16"><a href="preprocess.html#cb10-16" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>gibasa<span class="sc">::</span><span class="fu">is_blank</span>(token)) <span class="sc">|&gt;</span></span>
-<span id="cb10-17"><a href="preprocess.html#cb10-17" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">prettify</span>(<span class="at">col_select =</span> <span class="fu">c</span>(<span class="st">&quot;POS1&quot;</span>, <span class="st">&quot;POS2&quot;</span>, <span class="st">&quot;Original&quot;</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb10-18"><a href="preprocess.html#cb10-18" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">token =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(<span class="fu">is.na</span>(Original), token, Original)) <span class="sc">|&gt;</span></span>
-<span id="cb10-19"><a href="preprocess.html#cb10-19" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">add_count</span>(doc_id, token) <span class="sc">|&gt;</span></span>
-<span id="cb10-20"><a href="preprocess.html#cb10-20" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">mute_tokens</span>(POS1 <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;助詞&quot;</span>, <span class="st">&quot;助動詞&quot;</span>, <span class="st">&quot;記号&quot;</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb10-21"><a href="preprocess.html#cb10-21" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">mute_tokens</span>(POS2 <span class="sc">==</span> <span class="st">&quot;非自立&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb10-22"><a href="preprocess.html#cb10-22" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">pack</span>()</span>
-<span id="cb10-23"><a href="preprocess.html#cb10-23" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">|&gt;</span></span>
-<span id="cb10-24"><a href="preprocess.html#cb10-24" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">list_rbind</span>() <span class="sc">|&gt;</span></span>
-<span id="cb10-25"><a href="preprocess.html#cb10-25" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
-<span id="cb10-26"><a href="preprocess.html#cb10-26" aria-hidden="true" tabindex="-1"></a>    corp <span class="sc">|&gt;</span> </span>
-<span id="cb10-27"><a href="preprocess.html#cb10-27" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
-<span id="cb10-28"><a href="preprocess.html#cb10-28" aria-hidden="true" tabindex="-1"></a>        review_id, product_category,</span>
-<span id="cb10-29"><a href="preprocess.html#cb10-29" aria-hidden="true" tabindex="-1"></a>        verified_purchase,</span>
-<span id="cb10-30"><a href="preprocess.html#cb10-30" aria-hidden="true" tabindex="-1"></a>        star_rating, helpful_votes, total_votes,</span>
-<span id="cb10-31"><a href="preprocess.html#cb10-31" aria-hidden="true" tabindex="-1"></a>        review_len, review_month, review_wday</span>
-<span id="cb10-32"><a href="preprocess.html#cb10-32" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb10-33"><a href="preprocess.html#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;doc_id&quot;</span> <span class="ot">=</span> <span class="st">&quot;review_id&quot;</span>)</span>
-<span id="cb10-34"><a href="preprocess.html#cb10-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb10-35"><a href="preprocess.html#cb10-35" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="preprocess.html#cb9-1" aria-hidden="true" tabindex="-1"></a>corp <span class="ot">&lt;-</span> corp <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="preprocess.html#cb9-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(review_id, review_headline, review_body) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="preprocess.html#cb9-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">chunk_id =</span> dplyr<span class="sc">::</span><span class="fu">ntile</span>(dplyr<span class="sc">::</span><span class="fu">row_number</span>(), <span class="dv">10</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="preprocess.html#cb9-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(chunk_id) <span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a href="preprocess.html#cb9-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_map</span>(\(df, grp) {</span>
+<span id="cb9-6"><a href="preprocess.html#cb9-6" aria-hidden="true" tabindex="-1"></a>    df <span class="sc">|&gt;</span></span>
+<span id="cb9-7"><a href="preprocess.html#cb9-7" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-8"><a href="preprocess.html#cb9-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">review_body =</span> stringi<span class="sc">::</span><span class="fu">stri_c</span>(review_headline, review_body, <span class="at">sep =</span> <span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-9"><a href="preprocess.html#cb9-9" aria-hidden="true" tabindex="-1"></a>          stringi<span class="sc">::</span><span class="fu">stri_replace_all_regex</span>(<span class="st">&quot;(&lt;br /&gt;)&quot;</span>, <span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-10"><a href="preprocess.html#cb9-10" aria-hidden="true" tabindex="-1"></a>          audubon<span class="sc">::</span><span class="fu">strj_normalize</span>() <span class="sc">|&gt;</span></span>
+<span id="cb9-11"><a href="preprocess.html#cb9-11" aria-hidden="true" tabindex="-1"></a>          stringi<span class="sc">::</span><span class="fu">stri_trim_both</span>() <span class="sc">|&gt;</span></span>
+<span id="cb9-12"><a href="preprocess.html#cb9-12" aria-hidden="true" tabindex="-1"></a>          stringi<span class="sc">::</span><span class="fu">stri_replace_all_regex</span>(<span class="st">&quot;[</span><span class="sc">\\</span><span class="st">d]+&quot;</span>, <span class="st">&quot;0&quot;</span>)</span>
+<span id="cb9-13"><a href="preprocess.html#cb9-13" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span></span>
+<span id="cb9-14"><a href="preprocess.html#cb9-14" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(review_id, review_body) <span class="sc">|&gt;</span></span>
+<span id="cb9-15"><a href="preprocess.html#cb9-15" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">tokenize</span>(review_body, review_id) <span class="sc">|&gt;</span></span>
+<span id="cb9-16"><a href="preprocess.html#cb9-16" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>gibasa<span class="sc">::</span><span class="fu">is_blank</span>(token)) <span class="sc">|&gt;</span></span>
+<span id="cb9-17"><a href="preprocess.html#cb9-17" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">prettify</span>(<span class="at">col_select =</span> <span class="fu">c</span>(<span class="st">&quot;POS1&quot;</span>, <span class="st">&quot;POS2&quot;</span>, <span class="st">&quot;Original&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-18"><a href="preprocess.html#cb9-18" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">token =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(<span class="fu">is.na</span>(Original), token, Original)) <span class="sc">|&gt;</span></span>
+<span id="cb9-19"><a href="preprocess.html#cb9-19" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">add_count</span>(doc_id, token) <span class="sc">|&gt;</span></span>
+<span id="cb9-20"><a href="preprocess.html#cb9-20" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">mute_tokens</span>(POS1 <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;助詞&quot;</span>, <span class="st">&quot;助動詞&quot;</span>, <span class="st">&quot;記号&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-21"><a href="preprocess.html#cb9-21" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">mute_tokens</span>(POS2 <span class="sc">==</span> <span class="st">&quot;非自立&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-22"><a href="preprocess.html#cb9-22" aria-hidden="true" tabindex="-1"></a>      gibasa<span class="sc">::</span><span class="fu">pack</span>()</span>
+<span id="cb9-23"><a href="preprocess.html#cb9-23" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">|&gt;</span></span>
+<span id="cb9-24"><a href="preprocess.html#cb9-24" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">list_rbind</span>() <span class="sc">|&gt;</span></span>
+<span id="cb9-25"><a href="preprocess.html#cb9-25" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb9-26"><a href="preprocess.html#cb9-26" aria-hidden="true" tabindex="-1"></a>    corp <span class="sc">|&gt;</span> </span>
+<span id="cb9-27"><a href="preprocess.html#cb9-27" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb9-28"><a href="preprocess.html#cb9-28" aria-hidden="true" tabindex="-1"></a>        review_id, product_category,</span>
+<span id="cb9-29"><a href="preprocess.html#cb9-29" aria-hidden="true" tabindex="-1"></a>        verified_purchase,</span>
+<span id="cb9-30"><a href="preprocess.html#cb9-30" aria-hidden="true" tabindex="-1"></a>        star_rating, helpful_votes, total_votes,</span>
+<span id="cb9-31"><a href="preprocess.html#cb9-31" aria-hidden="true" tabindex="-1"></a>        review_len, review_month, review_wday</span>
+<span id="cb9-32"><a href="preprocess.html#cb9-32" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb9-33"><a href="preprocess.html#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;doc_id&quot;</span> <span class="ot">=</span> <span class="st">&quot;review_id&quot;</span>)</span>
+<span id="cb9-34"><a href="preprocess.html#cb9-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-35"><a href="preprocess.html#cb9-35" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code></pre></div>
 </div>
 <div id="形態素解析の結果の確認" class="section level2 hasAnchor" number="3.2">
 <h2><span class="header-section-number">3.2</span> 形態素解析の結果の確認<a href="preprocess.html#形態素解析の結果の確認" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>後で<code>textrecipes::step_tokenfilter</code>を使って語彙を減らすので、この段階で大体の語彙数を確認します。<code>rsample::initial_split</code>はとくに何も指定しないと75%を訓練データにするので、コーパス全体の75%くらいについて、語彙数を確認しておきます。</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="preprocess.html#cb11-1" aria-hidden="true" tabindex="-1"></a>corp <span class="sc">|&gt;</span></span>
-<span id="cb11-2"><a href="preprocess.html#cb11-2" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">corpus</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb11-3"><a href="preprocess.html#cb11-3" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">corpus_sample</span>(<span class="at">x =</span> ., <span class="at">size =</span> <span class="fu">floor</span>(quanteda<span class="sc">::</span><span class="fu">ndoc</span>(.) <span class="sc">*</span> .<span class="dv">75</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb11-4"><a href="preprocess.html#cb11-4" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">tokens</span>(<span class="at">what =</span> <span class="st">&quot;fastestword&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-5"><a href="preprocess.html#cb11-5" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm</span>() <span class="sc">|&gt;</span></span>
-<span id="cb11-6"><a href="preprocess.html#cb11-6" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm_trim</span>(<span class="at">min_termfreq =</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-7"><a href="preprocess.html#cb11-7" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">nfeat</span>()</span></code></pre></div>
-<pre><code>## [1] 1904</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="preprocess.html#cb13-1" aria-hidden="true" tabindex="-1"></a>corp <span class="sc">|&gt;</span></span>
-<span id="cb13-2"><a href="preprocess.html#cb13-2" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">corpus</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb13-3"><a href="preprocess.html#cb13-3" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">corpus_sample</span>(<span class="at">x =</span> ., <span class="at">size =</span> <span class="fu">floor</span>(quanteda<span class="sc">::</span><span class="fu">ndoc</span>(.) <span class="sc">*</span> .<span class="dv">75</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb13-4"><a href="preprocess.html#cb13-4" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">tokens</span>(<span class="at">what =</span> <span class="st">&quot;fastestword&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-5"><a href="preprocess.html#cb13-5" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm</span>() <span class="sc">|&gt;</span></span>
-<span id="cb13-6"><a href="preprocess.html#cb13-6" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm_trim</span>(<span class="at">min_termfreq =</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-7"><a href="preprocess.html#cb13-7" aria-hidden="true" tabindex="-1"></a>  quanteda.textstats<span class="sc">::</span><span class="fu">textstat_frequency</span>(</span>
-<span id="cb13-8"><a href="preprocess.html#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> 20L,</span>
-<span id="cb13-9"><a href="preprocess.html#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">groups =</span> product_category,</span>
-<span id="cb13-10"><a href="preprocess.html#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">force =</span> <span class="cn">TRUE</span></span>
-<span id="cb13-11"><a href="preprocess.html#cb13-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb13-12"><a href="preprocess.html#cb13-12" aria-hidden="true" tabindex="-1"></a>  ggpubr<span class="sc">::</span><span class="fu">ggdotchart</span>(</span>
-<span id="cb13-13"><a href="preprocess.html#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;feature&quot;</span>,</span>
-<span id="cb13-14"><a href="preprocess.html#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;frequency&quot;</span>,</span>
-<span id="cb13-15"><a href="preprocess.html#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;group&quot;</span>,</span>
-<span id="cb13-16"><a href="preprocess.html#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;group&quot;</span>,</span>
-<span id="cb13-17"><a href="preprocess.html#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> viridisLite<span class="sc">::</span><span class="fu">turbo</span>(<span class="dv">3</span>),</span>
-<span id="cb13-18"><a href="preprocess.html#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">add =</span> <span class="st">&quot;segment&quot;</span>,</span>
-<span id="cb13-19"><a href="preprocess.html#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">rotate =</span> <span class="cn">TRUE</span></span>
-<span id="cb13-20"><a href="preprocess.html#cb13-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb13-21"><a href="preprocess.html#cb13-21" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_bw</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="preprocess.html#cb10-1" aria-hidden="true" tabindex="-1"></a>corp <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="preprocess.html#cb10-2" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">corpus</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="preprocess.html#cb10-3" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">corpus_sample</span>(<span class="at">x =</span> ., <span class="at">size =</span> <span class="fu">floor</span>(quanteda<span class="sc">::</span><span class="fu">ndoc</span>(.) <span class="sc">*</span> .<span class="dv">75</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-4"><a href="preprocess.html#cb10-4" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">tokens</span>(<span class="at">what =</span> <span class="st">&quot;fastestword&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="preprocess.html#cb10-5" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm</span>() <span class="sc">|&gt;</span></span>
+<span id="cb10-6"><a href="preprocess.html#cb10-6" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm_trim</span>(<span class="at">min_termfreq =</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="preprocess.html#cb10-7" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">nfeat</span>()</span></code></pre></div>
+<pre><code>## [1] 1901</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="preprocess.html#cb12-1" aria-hidden="true" tabindex="-1"></a>corp <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="preprocess.html#cb12-2" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">corpus</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="preprocess.html#cb12-3" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">corpus_sample</span>(<span class="at">x =</span> ., <span class="at">size =</span> <span class="fu">floor</span>(quanteda<span class="sc">::</span><span class="fu">ndoc</span>(.) <span class="sc">*</span> .<span class="dv">75</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="preprocess.html#cb12-4" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">tokens</span>(<span class="at">what =</span> <span class="st">&quot;fastestword&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-5"><a href="preprocess.html#cb12-5" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm</span>() <span class="sc">|&gt;</span></span>
+<span id="cb12-6"><a href="preprocess.html#cb12-6" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">dfm_trim</span>(<span class="at">min_termfreq =</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-7"><a href="preprocess.html#cb12-7" aria-hidden="true" tabindex="-1"></a>  quanteda.textstats<span class="sc">::</span><span class="fu">textstat_frequency</span>(</span>
+<span id="cb12-8"><a href="preprocess.html#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> 20L,</span>
+<span id="cb12-9"><a href="preprocess.html#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">groups =</span> product_category,</span>
+<span id="cb12-10"><a href="preprocess.html#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">force =</span> <span class="cn">TRUE</span></span>
+<span id="cb12-11"><a href="preprocess.html#cb12-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb12-12"><a href="preprocess.html#cb12-12" aria-hidden="true" tabindex="-1"></a>  ggpubr<span class="sc">::</span><span class="fu">ggdotchart</span>(</span>
+<span id="cb12-13"><a href="preprocess.html#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">&quot;feature&quot;</span>,</span>
+<span id="cb12-14"><a href="preprocess.html#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">&quot;frequency&quot;</span>,</span>
+<span id="cb12-15"><a href="preprocess.html#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">&quot;group&quot;</span>,</span>
+<span id="cb12-16"><a href="preprocess.html#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;group&quot;</span>,</span>
+<span id="cb12-17"><a href="preprocess.html#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> viridisLite<span class="sc">::</span><span class="fu">turbo</span>(<span class="dv">3</span>),</span>
+<span id="cb12-18"><a href="preprocess.html#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">add =</span> <span class="st">&quot;segment&quot;</span>,</span>
+<span id="cb12-19"><a href="preprocess.html#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">rotate =</span> <span class="cn">TRUE</span></span>
+<span id="cb12-20"><a href="preprocess.html#cb12-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb12-21"><a href="preprocess.html#cb12-21" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">theme_bw</span>()</span></code></pre></div>
 <div class="figure"><span style="display:block;" id="fig:unnamed-chunk-10"></span>
 <img src="_main_files/figure-html/unnamed-chunk-10-1.png" alt="Frequent words in each category." width="672" />
 <p class="caption">

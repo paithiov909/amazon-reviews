@@ -7,8 +7,8 @@
 ランダムフォレストは次のような特徴があるとされていて、とくに2010年代前半ごろまでよく使われていました。
 
 - 過学習が起こりにくいとされ、扱いやすい
-- 高次元だったり、相関があったりするデータでもわりと大丈夫
-- 欠損値がある・不均衡なデータでもわりと大丈夫
+- 高次元だったり、相関があったりするデータでもわりと大丈夫^[たぶん実装によって異なります]
+- 欠損値がある・不均衡なデータでもわりと大丈夫^[実装によって異なります]
 - 木をつくるのは並列実行できるので、速い
 - 変数重要度を確認できる
 
@@ -27,7 +27,7 @@
 - randomForest
 - spark
 
-@JSSv077i01 は、randomForestよりも後発の実装です。
+@JSSv077i01 は、randomForestよりも後発の実装です。同じくらいの時期に発表された[Rborist](https://cran.r-project.org/package=Rborist)という実装もありましたが、そちらは使えないようです。
 
 
 ## ハイパーパラメータ
@@ -71,9 +71,9 @@ mtryのデフォルト値は`floor(sqrt(ncol(x)))`となっています。`range
 `ranger::ranger`の引数はたくさんありますが、ハイパーパラメータは上の3つなので、他の引数についてはあまり触る機会はないです。
 
 
-### imporatnce
+### importance
 
-変数重要度を出したい場合、分類では`impurity`、回帰では`permutation`を指定します。
+変数重要度を出したい場合、`impurity`や`permutation`を指定します。
 
 なお、impurityベースの変数重要度については注意して使いましょうという[議論](https://scikit-learn.org/stable/modules/ensemble.html#feature-importance-evaluation)もあります。
 

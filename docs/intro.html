@@ -23,7 +23,7 @@
 <meta name="author" content="Akiru Kato" />
 
 
-<meta name="date" content="2023-03-11" />
+<meta name="date" content="2023-03-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -174,7 +174,7 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#その他の引数"><i class="fa fa-check"></i><b>1.3</b> その他の引数</a>
 <ul>
-<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#imporatnce"><i class="fa fa-check"></i><b>1.3.1</b> imporatnce</a></li>
+<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#importance"><i class="fa fa-check"></i><b>1.3.1</b> importance</a></li>
 <li class="chapter" data-level="1.3.2" data-path="intro.html"><a href="intro.html#num.threads"><i class="fa fa-check"></i><b>1.3.2</b> num.threads</a></li>
 </ul></li>
 </ul></li>
@@ -194,7 +194,11 @@ div.csl-indent {
 <li class="chapter" data-level="4.2" data-path="modeling.html"><a href="modeling.html#ハイパーパラメータの探索"><i class="fa fa-check"></i><b>4.2</b> ハイパーパラメータの探索</a></li>
 <li class="chapter" data-level="4.3" data-path="modeling.html"><a href="modeling.html#モデルの評価"><i class="fa fa-check"></i><b>4.3</b> モデルの評価</a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i><b>5</b> Sessioninfo</a></li>
+<li class="chapter" data-level="5" data-path="dmr.html"><a href="dmr.html"><i class="fa fa-check"></i><b>5</b> DMR</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="dmr.html"><a href="dmr.html#dmrdistributed-multinomial-regression"><i class="fa fa-check"></i><b>5.1</b> DMR（distributed multinomial regression）</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i>Sessioninfo</a></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 </ul>
 
@@ -220,8 +224,8 @@ div.csl-indent {
 <p>ランダムフォレストは次のような特徴があるとされていて、とくに2010年代前半ごろまでよく使われていました。</p>
 <ul>
 <li>過学習が起こりにくいとされ、扱いやすい</li>
-<li>高次元だったり、相関があったりするデータでもわりと大丈夫</li>
-<li>欠損値がある・不均衡なデータでもわりと大丈夫</li>
+<li>高次元だったり、相関があったりするデータでもわりと大丈夫<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></li>
+<li>欠損値がある・不均衡なデータでもわりと大丈夫<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></li>
 <li>木をつくるのは並列実行できるので、速い</li>
 <li>変数重要度を確認できる</li>
 </ul>
@@ -237,7 +241,7 @@ div.csl-indent {
 <li>randomForest</li>
 <li>spark</li>
 </ul>
-<p><span class="citation">Wright and Ziegler (<a href="#ref-JSSv077i01" role="doc-biblioref">2017</a>)</span> は、randomForestよりも後発の実装です。</p>
+<p><span class="citation">Wright and Ziegler (<a href="#ref-JSSv077i01" role="doc-biblioref">2017</a>)</span> は、randomForestよりも後発の実装です。同じくらいの時期に発表された<a href="https://cran.r-project.org/package=Rborist">Rborist</a>という実装もありましたが、そちらは使えないようです。</p>
 </div>
 <div id="ハイパーパラメータ" class="section level2 hasAnchor" number="1.2">
 <h2><span class="header-section-number">1.2</span> ハイパーパラメータ<a href="intro.html#ハイパーパラメータ" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -269,9 +273,9 @@ div.csl-indent {
 <div id="その他の引数" class="section level2 hasAnchor" number="1.3">
 <h2><span class="header-section-number">1.3</span> その他の引数<a href="intro.html#その他の引数" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><code>ranger::ranger</code>の引数はたくさんありますが、ハイパーパラメータは上の3つなので、他の引数についてはあまり触る機会はないです。</p>
-<div id="imporatnce" class="section level3 hasAnchor" number="1.3.1">
-<h3><span class="header-section-number">1.3.1</span> imporatnce<a href="intro.html#imporatnce" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>変数重要度を出したい場合、分類では<code>impurity</code>、回帰では<code>permutation</code>を指定します。</p>
+<div id="importance" class="section level3 hasAnchor" number="1.3.1">
+<h3><span class="header-section-number">1.3.1</span> importance<a href="intro.html#importance" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>変数重要度を出したい場合、<code>impurity</code>や<code>permutation</code>を指定します。</p>
 <p>なお、impurityベースの変数重要度については注意して使いましょうという<a href="https://scikit-learn.org/stable/modules/ensemble.html#feature-importance-evaluation">議論</a>もあります。</p>
 </div>
 <div id="num.threads" class="section level3 hasAnchor" number="1.3.2">
@@ -289,6 +293,13 @@ Breiman, Leo. 2001. <span>“Random Forests.”</span> <em>Machine Learning</em>
 <div id="ref-JSSv077i01" class="csl-entry">
 Wright, Marvin N., and Andreas Ziegler. 2017. <span>“Ranger: A Fast Implementation of Random Forests for High Dimensional Data in c++ and r.”</span> <em>Journal of Statistical Software</em> 77 (1): 1–17. <a href="https://doi.org/10.18637/jss.v077.i01">https://doi.org/10.18637/jss.v077.i01</a>.
 </div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="1">
+<li id="fn1"><p>たぶん実装によって異なります<a href="intro.html#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>実装によって異なります<a href="intro.html#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
 </div>
             </section>
 

@@ -10,7 +10,7 @@ mtry木を作成するときに使う特徴量の数
 trees作成する木の数
 min_nノードサイズの下限値
 その他の引数
-imporatnce
+importance
 num.threads
 summary
 データセット
@@ -22,4 +22,5 @@ modeling
 ワークフローの作成
 ハイパーパラメータの探索
 モデルの評価
-session
+dmr
+dmrdistributed-multinomial-regression

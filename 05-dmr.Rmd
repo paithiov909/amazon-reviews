@@ -1,0 +1,70 @@
+# DMR {#dmr}
+
+予測そのものよりも、ようするに変数重要度を確認したいというのが主な目的の場合（いわゆる「架空の予測問題」を解く場合）、「DMR（distributed multinomial regression）」という手法が便利かもしれません。
+
+## DMR（distributed multinomial regression）
+
+DMR（distributed multinomial regression）は、@Taddy2015 で提案された手法で、雑に言うと多項ロジスティック回帰を高次元のデータでも速くできるようにしたものです。[distrom](https://cran.r-project.org/package=distrom)というRパッケージから使えます。
+
+DMRはたとえば次のようにして実行します。product_categoryについては順序がないので、ここではダミー変数化しています。
+
+```{r}
+mat <- corp_train |>
+  quanteda::corpus() %>%
+  quanteda::tokens(what = "fastestword") |>
+  quanteda::dfm() |>
+  quanteda::dfm_trim(min_termfreq = 100, max_termfreq = 1e4) |>
+  quanteda::dfm_tfidf() |>
+  as("dgCMatrix")
+
+covars <- corp_train |>
+  dplyr::select(product_category, star_rating) |>
+  dplyr::transmute(
+    pc_video_dvd = dplyr::if_else(product_category == "Video DVD", 1, 0),
+    pc_music = dplyr::if_else(product_category == "Music", 1, 0),
+    pc_other = dplyr::if_else(product_category == "Other", 1, 0),
+    star_rating = as.integer(star_rating)
+  ) |>
+  as.matrix() |>
+  as("dgCMatrix")
+
+cl <-
+  parallel::makeCluster(
+    max(1, parallel::detectCores() - 1, na.rm = TRUE)
+  )
+
+ret <-
+  distrom::dmr(
+    cl,
+    covars = covars,
+    counts = mat
+  )
+
+parallel::stopCluster(cl)
+```
+
+coefficientsが大きい特徴量を確認します。
+
+```{r}
+coef(ret)["pc_video_dvd",] |>
+  sort(decreasing = TRUE) |>
+  head(50)
+```
+
+```{r}
+coef(ret)["pc_music",] |>
+  sort(decreasing = TRUE) |>
+  head(50)
+```
+
+```{r}
+coef(ret)["pc_other",] |>
+  sort(decreasing = TRUE) |>
+  head(50)
+```
+
+```{r}
+coef(ret)["star_rating",] |>
+  sort(decreasing = TRUE) |>
+  head(50)
+```

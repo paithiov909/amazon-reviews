@@ -16,7 +16,7 @@ github-repo: "paithiov909/amazon-reviews"
 
 > R（tidymodels）でrangerのランダムフォレストを使ってみます
 
-```{r}
+```{r include=FALSE}
 require(tidymodels)
 require(textrecipes)
 tidymodels::tidymodels_prefer()

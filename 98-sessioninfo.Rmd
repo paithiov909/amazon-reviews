@@ -1,4 +1,4 @@
-# Sessioninfo {#session}
+# Sessioninfo {-#session}
 
 ```{r}
 sessioninfo::session_info()
